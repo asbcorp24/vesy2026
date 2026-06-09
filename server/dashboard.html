@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SmartBasket Monitor</title>
+  <style>
+    :root {
+      --bg: #f3f7f6;
+      --card: #ffffff;
+      --ink: #14332d;
+      --muted: #5f746f;
+      --line: rgba(20, 51, 45, 0.10);
+      --accent: #0f766e;
+      --accent-soft: rgba(15, 118, 110, 0.10);
+      --ok-bg: rgba(22, 163, 74, 0.12);
+      --ok-ink: #15803d;
+      --warn-bg: rgba(217, 119, 6, 0.12);
+      --warn-ink: #b45309;
+      --danger-bg: rgba(220, 38, 38, 0.12);
+      --danger-ink: #b91c1c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15,118,110,0.12), transparent 24%),
+        linear-gradient(180deg, #f8fbfa 0%, var(--bg) 100%);
+    }
+
+    .shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    .hero,
+    .panel,
+    .basket-card {
+      background: rgba(255,255,255,0.94);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: 0 18px 50px rgba(18, 52, 45, 0.08);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      padding: 24px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.3fr 0.9fr;
+      gap: 20px;
+    }
+
+    .basket-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .basket-card {
+      padding: 18px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      border-left-width: 6px;
+    }
+
+    .basket-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(15,118,110,0.30);
+    }
+
+    .basket-card.active {
+      box-shadow: 0 20px 40px rgba(15,118,110,0.12);
+      background: linear-gradient(180deg, #ffffff 0%, #f5fbfa 100%);
+    }
+
+    .status-ok {
+      border-left-color: rgba(22, 163, 74, 0.55);
+    }
+
+    .status-low {
+      border-left-color: rgba(217, 119, 6, 0.55);
+    }
+
+    .status-empty {
+      border-left-color: rgba(220, 38, 38, 0.55);
+    }
+
+    .basket-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: baseline;
+    }
+
+    .basket-id {
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .basket-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .pill,
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .pill {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .status-pill.status-ok {
+      background: var(--ok-bg);
+      color: var(--ok-ink);
+    }
+
+    .status-pill.status-low {
+      background: var(--warn-bg);
+      color: var(--warn-ink);
+    }
+
+    .status-pill.status-empty {
+      background: var(--danger-bg);
+      color: var(--danger-ink);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .detail-card {
+      padding: 14px;
+      border-radius: 18px;
+      background: #f8fbfa;
+      border: 1px solid var(--line);
+    }
+
+    .detail-card strong {
+      display: block;
+      font-size: 24px;
+      margin-top: 6px;
+    }
+
+    .history {
+      margin-top: 18px;
+      display: grid;
+      gap: 10px;
+      max-height: 360px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .history-item {
+      padding: 12px;
+      border-radius: 16px;
+      background: #f8fbfa;
+      border: 1px solid var(--line);
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      background: var(--accent);
+      color: white;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .empty {
+      padding: 26px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.6);
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div>
+        <h1>Мониторинг корзин SmartBasket</h1>
+        <div class="muted">Сервер показывает текущее состояние корзин, общий вес, остаток товара и историю последних сообщений.</div>
+      </div>
+      <div>
+        <button onclick="refreshAll()">Обновить</button>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="panel">
+        <div class="stat-label">Корзин в системе</div>
+        <div class="stat-value" id="statBaskets">0</div>
+      </div>
+      <div class="panel">
+        <div class="stat-label">Суммарный вес</div>
+        <div class="stat-value" id="statWeight">0 г</div>
+      </div>
+      <div class="panel">
+        <div class="stat-label">Суммарный остаток</div>
+        <div class="stat-value" id="statQuantity">0</div>
+      </div>
+      <div class="panel">
+        <div class="stat-label">Последнее обновление</div>
+        <div class="stat-value" id="statUpdated" style="font-size:18px">-</div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="panel">
+        <h2 style="margin-top:0">Корзины</h2>
+        <div id="basketList" class="basket-list"></div>
+      </div>
+
+      <div class="panel">
+        <h2 style="margin-top:0">Детали корзины</h2>
+        <div id="basketDetail" class="empty">Выберите корзину слева</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let selectedBasketId = null;
+    let basketItems = [];
+
+    function num(value, digits = 1) {
+      const v = Number(value ?? 0);
+      return Number.isFinite(v) ? v.toFixed(digits) : '0';
+    }
+
+    function ts(value) {
+      if (!value) return '-';
+      const d = new Date(value.replace(' ', 'T'));
+      return Number.isNaN(d.getTime()) ? value : d.toLocaleString();
+    }
+
+    function getStatus(fillPercent) {
+      const value = Number(fillPercent || 0);
+      if (value <= 10) {
+        return { cls: 'status-empty', label: 'Почти пусто' };
+      }
+      if (value <= 35) {
+        return { cls: 'status-low', label: 'Мало товара' };
+      }
+      return { cls: 'status-ok', label: 'Норма' };
+    }
+
+    async function api(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+
+    function renderStats(items) {
+      const totalWeight = items.reduce((sum, item) => sum + Number(item.total_weight || 0), 0);
+      const totalQuantity = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+      const latest = items.length ? items[0].updated_at : null;
+      document.getElementById('statBaskets').textContent = `${items.length}`;
+      document.getElementById('statWeight').textContent = `${num(totalWeight)} г`;
+      document.getElementById('statQuantity').textContent = `${totalQuantity}`;
+      document.getElementById('statUpdated').textContent = ts(latest);
+    }
+
+    function renderList(items) {
+      const root = document.getElementById('basketList');
+      if (!items.length) {
+        root.innerHTML = '<div class="empty">Данные от корзин еще не поступали</div>';
+        return;
+      }
+
+      root.innerHTML = items.map(item => {
+        const status = getStatus(item.fill_percent);
+        return `
+          <article class="basket-card ${status.cls} ${selectedBasketId === item.basket_id ? 'active' : ''}" onclick="selectBasket('${item.basket_id}')">
+            <div class="basket-head">
+              <div>
+                <div class="basket-id">${item.basket_id}</div>
+                <div class="muted">${item.product_name || 'Без названия товара'}</div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+                <span class="status-pill ${status.cls}">${status.label}</span>
+                <span class="pill">${item.product_code || 'без кода'}</span>
+              </div>
+            </div>
+            <div class="muted" style="margin-bottom:12px">${item.basket_location || 'Место не указано'}</div>
+            <div class="basket-grid">
+              <div><div class="stat-label">Вес</div><strong>${num(item.total_weight)} г</strong></div>
+              <div><div class="stat-label">Остаток</div><strong>${item.quantity ?? 0}</strong></div>
+              <div><div class="stat-label">Изъято</div><strong>${item.removed_quantity ?? 0}</strong></div>
+              <div><div class="stat-label">Заполнение</div><strong>${num(item.fill_percent, 0)} %</strong></div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    async function selectBasket(basketId) {
+      selectedBasketId = basketId;
+      renderList(basketItems);
+
+      const [basket, history] = await Promise.all([
+        api(`/api/baskets/${basketId}`),
+        api(`/api/baskets/${basketId}/history?limit=20`)
+      ]);
+
+      const status = getStatus(basket.fillPercent);
+      const root = document.getElementById('basketDetail');
+      root.className = '';
+      root.innerHTML = `
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div class="pill">${basket.mode === 'pieces' ? 'Режим: штуки' : 'Режим: масса'}</div>
+          <div class="status-pill ${status.cls}">${status.label}</div>
+        </div>
+        <h3 style="margin-bottom:6px">${basket.productName || 'Без названия'}</h3>
+        <div class="muted">${basket.basketId} · ${basket.basketLocation || 'Место не указано'}</div>
+
+        <div class="detail-grid">
+          <div class="detail-card"><span class="muted">Общий вес</span><strong>${num(basket.totalWeight)} г</strong></div>
+          <div class="detail-card"><span class="muted">Остаток</span><strong>${basket.quantity ?? 0}</strong></div>
+          <div class="detail-card"><span class="muted">Было изначально</span><strong>${basket.fullQuantity ?? 0}</strong></div>
+          <div class="detail-card"><span class="muted">Изъято</span><strong>${basket.removedQuantity ?? 0}</strong></div>
+          <div class="detail-card"><span class="muted">Вес одной штуки</span><strong>${num(basket.unitWeight)} г</strong></div>
+          <div class="detail-card"><span class="muted">Полный вес</span><strong>${num(basket.fullWeight)} г</strong></div>
+          <div class="detail-card"><span class="muted">Заполнение</span><strong>${num(basket.fillPercent, 0)} %</strong></div>
+          <div class="detail-card"><span class="muted">Температура / влажность</span><strong>${num(basket.temperature)} C / ${num(basket.humidity, 0)} %</strong></div>
+        </div>
+
+        <h3 style="margin:18px 0 10px">Последние события</h3>
+        <div class="history">
+          ${(history.items || []).map(item => `
+            <div class="history-item">
+              <div style="display:flex;justify-content:space-between;gap:12px">
+                <strong>${num(item.totalWeight)} г · ${item.quantity ?? 0} шт</strong>
+                <span class="muted">${ts(item.receivedAt)}</span>
+              </div>
+              <div class="muted" style="margin-top:6px">
+                ${item.productName || 'Товар не указан'} · ${item.productCode || 'без кода'} · заполнение ${num(item.fillPercent, 0)} %
+              </div>
+            </div>
+          `).join('') || '<div class="empty">История пока пуста</div>'}
+        </div>
+      `;
+    }
+
+    async function refreshAll() {
+      const data = await api('/api/baskets');
+      basketItems = data.items || [];
+      renderStats(basketItems);
+      renderList(basketItems);
+
+      if (!selectedBasketId && basketItems.length) {
+        await selectBasket(basketItems[0].basket_id);
+        return;
+      }
+
+      if (selectedBasketId && basketItems.some(item => item.basket_id === selectedBasketId)) {
+        await selectBasket(selectedBasketId);
+      }
+    }
+
+    refreshAll();
+    setInterval(refreshAll, 5000);
+  </script>
+</body>
+</html>
