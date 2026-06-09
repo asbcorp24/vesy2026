@@ -1,35 +1,35 @@
 # SmartBasket Server
 
-Backend for SmartBasket baskets.
+Серверная часть для корзин SmartBasket.
 
-This server receives telemetry from baskets, stores the latest state and event history, manages retailers and stores, and provides two web pages:
+Сервер принимает телеметрию от корзин, хранит текущее состояние и историю событий, управляет ритейлорами и магазинами, а также предоставляет две веб-страницы:
 
-- monitoring page
-- admin page
+- мониторинг корзин
+- админка ритейлоров и магазинов
 
-## Technology
+## Технологии
 
 - `Python`
 - `FastAPI`
 - `Uvicorn`
 - `SQLite`
-- plain HTML pages for monitoring and admin
+- HTML-страницы для мониторинга и администрирования
 
-## Features
+## Возможности
 
-- receive basket data over HTTP
-- store latest basket state
-- store basket event history
-- create retailers
-- generate retailer PIN codes
-- create stores for retailers
-- register baskets to a retailer and store by PIN
-- show all baskets in a monitoring page
-- manage retailers and stores without Swagger
+- прием данных корзин по HTTP
+- хранение последнего состояния корзины
+- хранение истории событий корзины
+- создание ритейлоров
+- генерация PIN-кодов ритейлоров
+- создание магазинов для ритейлоров
+- регистрация корзины в магазине по PIN
+- мониторинг всех корзин через HTML-страницу
+- управление ритейлорами и магазинами без Swagger
 
-## Run
+## Запуск
 
-Create virtual environment and install dependencies:
+Создание виртуального окружения и установка зависимостей:
 
 ```bash
 python -m venv .venv
@@ -37,50 +37,50 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Start server:
+Старт сервера:
 
 ```bash
 uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 
-## Pages
+## Страницы
 
-- monitor: `http://localhost:8000/`
-- admin: `http://localhost:8000/admin`
+- мониторинг: `http://localhost:8000/`
+- админка: `http://localhost:8000/admin`
 - Swagger: `http://localhost:8000/docs`
 
-## Demo Data
+## Демо-данные
 
-On first start the server creates demo data automatically.
+При первом запуске сервер автоматически создает демо-данные.
 
-Retailer:
+Ритейлор:
 
-- name: `Demo Retailer`
+- название: `Demo Retailer`
 - PIN: `482615`
 
-Stores:
+Магазины:
 
 - `store-01` / `Магазин Центр`
 - `store-02` / `Магазин Север`
 
-This allows you to test basket registration immediately from the ESP32 web UI.
+Это позволяет сразу протестировать регистрацию корзины из веб-интерфейса ESP32.
 
-## Basket Registration Flow
+## Как регистрируется корзина
 
-1. Open the basket web UI on ESP32.
-2. Enter registration server URL, for example:
+1. Откройте веб-интерфейс корзины на ESP32.
+2. Укажите адрес сервера регистрации, например:
 
 ```text
 http://192.168.1.50:8000
 ```
 
-3. Enter retailer PIN.
-4. Load stores for that retailer.
-5. Select a store.
-6. Enter `basketId`, product, and basket location.
-7. Register basket.
+3. Введите PIN ритейлора.
+4. Загрузите список магазинов.
+5. Выберите магазин.
+6. Укажите `basketId`, товар и расположение корзины.
+7. Зарегистрируйте корзину.
 
-After registration, set or keep telemetry endpoint:
+После регистрации `HTTP endpoint` должен быть таким:
 
 ```text
 http://192.168.1.50:8000/api/baskets/ingest
@@ -88,42 +88,42 @@ http://192.168.1.50:8000/api/baskets/ingest
 
 ## API
 
-### Health
+### Проверка сервера
 
 - `GET /health`
 
-### Monitoring
+### Мониторинг
 
 - `GET /api/baskets`
 - `GET /api/baskets/{basket_id}`
 - `GET /api/baskets/{basket_id}/history`
 
-### Registration
+### Регистрация
 
 - `GET /api/registration/retailer-by-pin?pin=<PIN>`
 - `POST /api/registration/register-basket`
 
-Example request:
+Пример регистрации корзины:
 
 ```json
 {
   "pinCode": "482615",
   "storeId": "store-01",
   "basketId": "basket-01",
-  "basketLocation": "Hall 1 / Shelf 4",
-  "productName": "Apple",
+  "basketLocation": "Зал 1 / Полка 4",
+  "productName": "Яблоко",
   "productCode": "APL-001"
 }
 ```
 
-### Admin
+### Администрирование
 
 - `GET /api/admin/retailers`
 - `POST /api/admin/retailers`
 - `GET /api/admin/stores`
 - `POST /api/admin/stores`
 
-Create retailer example:
+Пример создания ритейлора:
 
 ```json
 {
@@ -131,22 +131,22 @@ Create retailer example:
 }
 ```
 
-Create store example:
+Пример создания магазина:
 
 ```json
 {
   "retailerId": "retailer-1234",
-  "name": "Store South",
-  "location": "Krasnodar, Example street",
+  "name": "Магазин Юг",
+  "location": "Краснодар, ул. Пример",
   "code": "SOUTH-01"
 }
 ```
 
-### Basket Telemetry
+### Телеметрия корзины
 
 - `POST /api/baskets/ingest`
 
-Example payload:
+Пример полезной нагрузки:
 
 ```json
 {
@@ -156,8 +156,8 @@ Example payload:
   "retailerPin": "482615",
   "storeId": "store-01",
   "storeName": "Магазин Центр",
-  "basketLocation": "Hall 1 / Shelf 4",
-  "productName": "Apple",
+  "basketLocation": "Зал 1 / Полка 4",
+  "productName": "Яблоко",
   "productCode": "APL-001",
   "totalWeight": 3250.0,
   "unitWeight": 250.0,
@@ -176,13 +176,13 @@ Example payload:
 }
 ```
 
-## Storage
+## Хранение данных
 
-Server stores data in:
+Сервер хранит данные в:
 
-- database file: `server/data/smartbasket.db`
+- файл базы данных: `server/data/smartbasket.db`
 
-SQLite tables:
+Таблицы SQLite:
 
 - `retailers`
 - `stores`

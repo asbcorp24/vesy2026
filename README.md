@@ -1,34 +1,36 @@
 # SmartBasket
 
-SmartBasket is an ESP32-based smart basket for retail and warehouse inventory control.
+SmartBasket — это интеллектуальная корзина на базе ESP32 для ритейла, склада и учета остатков товара.
 
-The basket measures total weight with 4 load cells through 4 HX711 modules, calculates how many items remain based on the weight of one product, registers itself to a retailer and store, and sends structured data to a server.
+Корзина измеряет общий вес с помощью 4 тензодатчиков через 4 модуля HX711, рассчитывает количество оставшихся товаров по весу одной штуки, регистрируется в структуре `ритейлор -> магазин -> корзина` и отправляет данные на сервер.
 
-## Features
+## Возможности
 
-- 4-corner weighing with `HX711 x4`
-- total weight measurement
-- item count calculation from `unitWeight`
-- remaining quantity, removed quantity, and fill percent calculation
-- basket registration in the structure `retailer -> store -> basket`
-- local web UI on ESP32
-- data sending over `HTTP`, `MQTT`, and `ESP-NOW`
-- settings storage in `NVS`
-- OLED display via `U8g2`
-- calibration from local menu and web UI
-- Python server with monitoring and admin pages
+- измерение веса по 4 углам через `HX711 x4`
+- расчет общего веса
+- расчет количества товаров по `unitWeight`
+- расчет остатка, изъятого количества и процента заполнения
+- хранение `basketId`, товара, расположения, ритейлора и магазина
+- регистрация корзины по PIN ритейлора
+- отправка данных по `HTTP`, `MQTT` и `ESP-NOW`
+- локальный веб-интерфейс на ESP32
+- хранение настроек в `NVS`
+- загрузка фронтенда из `LittleFS`
+- OLED-дисплей через `U8g2`
+- калибровка из локального меню и веб-интерфейса
+- Python-сервер с мониторингом и админкой
 
-## Project Structure
+## Структура проекта
 
-- [src](C:/Users/user/Documents/vesy/src) - ESP32 firmware
-- [include](C:/Users/user/Documents/vesy/include) - headers and configuration
-- [data](C:/Users/user/Documents/vesy/data) - ESP32 web UI for `LittleFS`
-- [server](C:/Users/user/Documents/vesy/server) - Python backend, monitor, and admin UI
-- [platformio.ini](C:/Users/user/Documents/vesy/platformio.ini) - PlatformIO build config
+- [src](C:/Users/user/Documents/vesy/src) — прошивка ESP32
+- [include](C:/Users/user/Documents/vesy/include) — заголовки и конфигурация
+- [data](C:/Users/user/Documents/vesy/data) — веб-интерфейс корзины для `LittleFS`
+- [server](C:/Users/user/Documents/vesy/server) — Python-сервер
+- [platformio.ini](C:/Users/user/Documents/vesy/platformio.ini) — конфигурация PlatformIO
 
-## Technology Stack
+## Стек технологий
 
-### Firmware
+### Прошивка
 
 - `ESP32 DevKit`
 - `Arduino framework`
@@ -38,65 +40,66 @@ The basket measures total weight with 4 load cells through 4 HX711 modules, calc
 - `PubSubClient`
 - `HX711`
 - `DHT sensor library`
-- `Preferences` / `NVS`
+- `Preferences / NVS`
 - `WiFi`, `WebServer`, `HTTPClient`, `ESP-NOW`
 - `LittleFS`
 
-### Server
+### Сервер
 
 - `Python`
 - `FastAPI`
 - `Uvicorn`
 - `SQLite`
-- plain HTML admin and monitoring pages
+- HTML-страницы для мониторинга и администрирования
 
-## Hardware
+## Оборудование
 
 - `ESP32 DevKit`
 - `4 x HX711`
-- `4 x load cells up to 10 kg`
+- `4 x тензодатчик до 10 кг`
 - `OLED 0.96" I2C`
 - `DHT11`
-- `2 buttons`
+- `2 кнопки`
 
-## Pinout
+## Распиновка
 
-The following pins are defined in firmware in [include/Config.h](C:/Users/user/Documents/vesy/include/Config.h).
+Пины заданы в [include/Config.h](C:/Users/user/Documents/vesy/include/Config.h).
 
-### HX711 connections
+### HX711
 
-| Corner | HX711 DOUT | HX711 SCK |
+| Угол | HX711 DOUT | HX711 SCK |
 | --- | --- | --- |
 | 1 | GPIO `32` | GPIO `4` |
 | 2 | GPIO `33` | GPIO `16` |
 | 3 | GPIO `25` | GPIO `17` |
 | 4 | GPIO `26` | GPIO `5` |
 
-### Other pins
+### Остальные устройства
 
-| Device | Pin |
+| Устройство | Пин |
 | --- | --- |
 | DHT11 data | GPIO `27` |
-| Menu button | GPIO `18` |
-| Select button | GPIO `19` |
+| Кнопка меню | GPIO `18` |
+| Кнопка выбора | GPIO `19` |
 
 ### OLED
 
-- Display type in firmware: `U8G2_SSD1306_128X64_NONAME_F_HW_I2C`
-- I2C address: `0x3C`
-- `USE_SH1106 = false` by default
+- драйвер в прошивке: `U8G2_SSD1306_128X64_NONAME_F_HW_I2C`
+- I2C-адрес: `0x3C`
+- `USE_SH1106 = false` по умолчанию
 
-Note:
-- The firmware does not call `Wire.begin(...)` with custom pins.
-- On a typical ESP32 DevKit this usually means default I2C pins:
+Примечание:
+
+- в прошивке сейчас нет явного `Wire.begin(SDA, SCL)`
+- для типичного ESP32 DevKit это обычно означает стандартные I2C-пины:
   - `SDA -> GPIO 21`
   - `SCL -> GPIO 22`
 
-If your board uses different I2C wiring, add explicit `Wire.begin(SDA, SCL)` later in firmware.
+Если на вашей плате дисплей подключен к другим линиям, это нужно будет отдельно задать в коде.
 
-## Current Device Logic
+## Что хранит корзина
 
-The basket stores:
+Корзина сохраняет:
 
 - `basketId`
 - `retailerId`
@@ -119,7 +122,7 @@ The basket stores:
 - `calibration[4]`
 - `changeThreshold`
 
-The basket calculates:
+## Что рассчитывает корзина
 
 - `totalWeight`
 - `quantity`
@@ -127,26 +130,26 @@ The basket calculates:
 - `removedQuantity`
 - `fillPercent`
 
-## Registration Flow
+## Сценарий регистрации корзины
 
-The intended workflow is:
+Рабочий процесс такой:
 
-1. Start the Python server.
-2. Create a retailer in the admin page.
-3. Get the generated retailer PIN.
-4. Create one or more stores for that retailer.
-5. Open the basket web UI on ESP32.
-6. Enter the registration server URL.
-7. Enter the retailer PIN.
-8. Load available stores.
-9. Select a store.
-10. Register the basket with its `basketId`, product, and physical location.
+1. Запускаете Python-сервер.
+2. Создаете ритейлора в админке.
+3. Получаете PIN ритейлора.
+4. Создаете один или несколько магазинов для этого ритейлора.
+5. Открываете веб-интерфейс корзины на ESP32.
+6. Указываете адрес сервера регистрации.
+7. Вводите PIN ритейлора.
+8. Загружаете список магазинов.
+9. Выбираете магазин.
+10. Регистрируете корзину с `basketId`, товаром и физическим расположением.
 
-After registration, the basket sends telemetry already linked to the correct retailer and store.
+После этого корзина отправляет телеметрию уже с привязкой к нужному ритейлору и магазину.
 
-## Data Sent By Basket
+## Какие данные отправляет корзина
 
-The basket sends structured JSON like:
+Корзина отправляет JSON такого типа:
 
 ```json
 {
@@ -155,9 +158,9 @@ The basket sends structured JSON like:
   "retailerName": "Demo Retailer",
   "retailerPin": "482615",
   "storeId": "store-01",
-  "storeName": "Store Center",
-  "basketLocation": "Hall 1 / Shelf 4",
-  "productName": "Apple",
+  "storeName": "Магазин Центр",
+  "basketLocation": "Зал 1 / Полка 4",
+  "productName": "Яблоко",
   "productCode": "APL-001",
   "totalWeight": 3250.0,
   "unitWeight": 250.0,
@@ -178,49 +181,49 @@ The basket sends structured JSON like:
 
 ## MQTT
 
-Base topic:
+Базовый топик:
 
 ```text
 smartbasket/state
 ```
 
-Per-basket topic:
+Топик конкретной корзины:
 
 ```text
 smartbasket/state/<basketId>
 ```
 
-MQTT client ID format:
+Формат MQTT client id:
 
 ```text
 smartbasket-<basketId>
 ```
 
-## Build And Flash
+## Сборка и загрузка
 
-### Firmware
+### Прошивка
 
-Build and upload firmware:
+Сборка и загрузка прошивки:
 
 ```bash
 pio run -t upload
 ```
 
-Upload web files to `LittleFS`:
+Загрузка веб-файлов в `LittleFS`:
 
 ```bash
 pio run -t uploadfs
 ```
 
-After boot:
+После загрузки:
 
-- AP SSID: `SmartBasket_AP`
-- AP password: `12345678`
-- local address: `http://192.168.4.1`
+- SSID точки доступа: `SmartBasket_AP`
+- пароль точки доступа: `12345678`
+- локальный адрес: `http://192.168.4.1`
 
-### Python Server
+### Python-сервер
 
-Install:
+Установка:
 
 ```bash
 cd server
@@ -229,33 +232,33 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Run:
+Запуск:
 
 ```bash
 uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 
-## Server Pages
+## Страницы сервера
 
-- monitor: `http://localhost:8000/`
-- admin: `http://localhost:8000/admin`
-- API docs: `http://localhost:8000/docs`
+- мониторинг: `http://localhost:8000/`
+- админка: `http://localhost:8000/admin`
+- документация API: `http://localhost:8000/docs`
 
-## Server API
+## API сервера
 
-### Admin
+### Администрирование
 
 - `POST /api/admin/retailers`
 - `GET /api/admin/retailers`
 - `POST /api/admin/stores`
 - `GET /api/admin/stores`
 
-### Registration
+### Регистрация
 
 - `GET /api/registration/retailer-by-pin?pin=<PIN>`
 - `POST /api/registration/register-basket`
 
-### Basket Data
+### Данные корзин
 
 - `POST /api/baskets/ingest`
 - `GET /api/baskets`
@@ -263,18 +266,18 @@ uvicorn app:app --host 0.0.0.0 --port 8000
 - `GET /api/baskets/{basketId}/history`
 - `GET /health`
 
-## Demo Data
+## Демо-данные
 
-On first server start, demo data is created automatically:
+При первом запуске сервер создает:
 
-- retailer: `Demo Retailer`
+- ритейлора: `Demo Retailer`
 - PIN: `482615`
-- stores:
+- магазины:
   - `store-01`
   - `store-02`
 
-## Notes
+## Примечания
 
-- `MPU-6050` is not integrated into firmware yet.
-- OLED is currently configured for `SSD1306`-compatible mode in code.
-- If your OLED is actually `SH1106`, switch the display driver in firmware.
+- `MPU-6050` пока не интегрирован в прошивку
+- OLED сейчас настроен под режим `SSD1306`
+- если ваш дисплей на самом деле `SH1106`, драйвер в прошивке нужно будет переключить
