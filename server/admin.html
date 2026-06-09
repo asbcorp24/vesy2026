@@ -2,113 +2,178 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>SmartBasket Admin</title>
   <style>
     :root {
-      --bg: #f4f7f6;
-      --card: #ffffff;
-      --ink: #16322d;
-      --muted: #61736f;
-      --line: rgba(22, 50, 45, 0.10);
-      --accent: #0f766e;
-      --accent-soft: rgba(15, 118, 110, 0.10);
+      --bg: #07111a;
+      --bg-soft: #0d1822;
+      --line: rgba(147, 197, 253, 0.12);
+      --ink: #e6f0ff;
+      --muted: #8aa0ba;
+      --accent: #19c2a7;
+      --accent-2: #5fb4ff;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+      --radius: 24px;
     }
 
     * { box-sizing: border-box; }
 
-    body {
+    html, body {
       margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
+      min-height: 100%;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(circle at top left, rgba(15,118,110,0.12), transparent 24%),
-        linear-gradient(180deg, #f8fbfa 0%, var(--bg) 100%);
+        radial-gradient(circle at top left, rgba(25, 194, 167, 0.16), transparent 24%),
+        radial-gradient(circle at top right, rgba(95, 180, 255, 0.12), transparent 28%),
+        linear-gradient(180deg, #09131c 0%, var(--bg) 100%);
     }
 
+    body { padding: 18px 14px 32px; }
+
     .shell {
-      max-width: 1280px;
+      width: min(1360px, 100%);
       margin: 0 auto;
-      padding: 24px 16px 40px;
+      display: grid;
+      gap: 16px;
     }
 
     .hero,
-    .panel {
-      background: rgba(255,255,255,0.94);
+    .panel,
+    .item,
+    .status,
+    .summary-card,
+    .basket-card,
+    .store-overview,
+    .mini-basket {
+      background: linear-gradient(180deg, rgba(18, 30, 42, 0.98) 0%, rgba(10, 18, 28, 0.96) 100%);
       border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: 0 18px 50px rgba(18, 52, 45, 0.08);
-      backdrop-filter: blur(8px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
     }
 
     .hero {
-      padding: 24px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 20px;
-    }
-
-    .panel {
       padding: 20px;
+      display: grid;
+      gap: 16px;
     }
 
+    .eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+      max-width: 14ch;
+    }
+
+    .hero p,
     .muted {
       color: var(--muted);
+      line-height: 1.5;
     }
 
-    .field {
-      margin-bottom: 14px;
+    .hero-actions,
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
     }
+
+    .grid,
+    .summary-grid,
+    .triple-grid,
+    .filter-grid,
+    .overview-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel { padding: 20px; }
+
+    .field { margin-bottom: 14px; }
 
     label {
       display: block;
-      margin-bottom: 6px;
-      font-size: 14px;
+      margin-bottom: 7px;
       color: var(--muted);
+      font-size: 13px;
     }
 
-    input, select {
+    input,
+    select {
       width: 100%;
-      border: 1px solid var(--line);
-      background: white;
-      border-radius: 14px;
+      min-height: 48px;
       padding: 12px 14px;
-      font: inherit;
+      border-radius: 14px;
+      border: 1px solid rgba(138, 160, 186, 0.16);
+      background: var(--bg-soft);
       color: var(--ink);
+      font: inherit;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(25, 194, 167, 0.56);
+      box-shadow: 0 0 0 3px rgba(25, 194, 167, 0.12);
+    }
+
+    input::placeholder { color: #66819c; }
 
     button {
-      border: 0;
+      min-height: 46px;
+      padding: 11px 16px;
       border-radius: 999px;
-      background: var(--accent);
-      color: white;
-      padding: 11px 18px;
+      border: 0;
+      font: inherit;
+      font-weight: 700;
+      letter-spacing: 0.01em;
       cursor: pointer;
-      font-weight: 600;
+      transition: transform 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    button:active { transform: translateY(1px) scale(0.99); }
+
+    .btn-primary {
+      color: #041119;
+      background: linear-gradient(135deg, var(--accent) 0%, #7cf0de 100%);
+      box-shadow: 0 10px 26px rgba(25, 194, 167, 0.22);
+    }
+
+    .btn-secondary {
+      color: var(--ink);
+      background: rgba(95, 180, 255, 0.12);
+      border: 1px solid rgba(95, 180, 255, 0.16);
     }
 
     .list {
       display: grid;
       gap: 12px;
       margin-top: 14px;
-      max-height: 480px;
+      max-height: 420px;
       overflow: auto;
     }
 
-    .item {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: #fbfdfc;
+    .item,
+    .basket-card,
+    .store-overview,
+    .mini-basket {
       padding: 14px;
+      border-radius: 18px;
+      background: rgba(13, 24, 34, 0.9);
     }
 
     .pill {
@@ -116,25 +181,97 @@
       align-items: center;
       padding: 6px 10px;
       border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent);
+      background: rgba(95, 180, 255, 0.12);
+      color: #a9d4ff;
+      border: 1px solid rgba(95, 180, 255, 0.14);
       font-size: 12px;
       font-weight: 700;
     }
 
     .status {
       margin-top: 14px;
-      border: 1px solid var(--line);
-      background: #f8fbfa;
       border-radius: 16px;
       padding: 12px 14px;
       color: var(--muted);
       min-height: 48px;
+      background: rgba(13, 24, 34, 0.9);
     }
 
-    @media (max-width: 960px) {
+    .summary-card {
+      padding: 16px;
+      border-radius: 22px;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      font-size: clamp(24px, 4vw, 34px);
+      letter-spacing: -0.05em;
+      font-weight: 700;
+    }
+
+    .empty {
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 18px;
+      background: rgba(13, 24, 34, 0.74);
+    }
+
+    .store-overview {
+      display: grid;
+      gap: 12px;
+    }
+
+    .mini-basket-row {
+      display: grid;
+      gap: 10px;
+    }
+
+    .mini-basket strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    @media (min-width: 700px) {
+      body { padding: 22px 18px 36px; }
+      .hero {
+        grid-template-columns: 1.4fr auto;
+        align-items: end;
+      }
+      .summary-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .filter-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1024px) {
       .grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .triple-grid {
+        grid-template-columns: 0.9fr 1fr 1.15fr;
+      }
+      .overview-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .mini-basket-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
   </style>
@@ -143,31 +280,50 @@
   <div class="shell">
     <section class="hero">
       <div>
-        <h1 style="margin:0 0 8px">Админка SmartBasket</h1>
-        <div class="muted">Создание ритейлоров, генерация PIN и добавление магазинов без Swagger.</div>
+        <div class="eyebrow">SmartBasket</div>
+        <h1>Админка ритейла</h1>
+        <p>Создание ритейлоров, генерация PIN, добавление магазинов и просмотр зарегистрированных корзин в одном темном интерфейсе.</p>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button onclick="loadAll()">Обновить</button>
-        <a href="/" style="text-decoration:none"><button type="button">Мониторинг</button></a>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="loadAll()">Обновить</button>
+        <a href="/" style="text-decoration:none"><button type="button" class="btn-secondary">Мониторинг</button></a>
+      </div>
+    </section>
+
+    <section class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">Ритейлоры</div>
+        <div class="summary-value" id="statRetailers">0</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Магазины</div>
+        <div class="summary-value" id="statStores">0</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Корзины</div>
+        <div class="summary-value" id="statBaskets">0</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Найдено по фильтру</div>
+        <div class="summary-value" id="statFiltered">0</div>
       </div>
     </section>
 
     <section class="grid">
       <div class="panel">
-        <h2 style="margin-top:0">Создать ритейлора</h2>
+        <h2 style="margin-top:0;margin-bottom:14px">Создать ритейлора</h2>
         <div class="field">
           <label for="retailerName">Название ритейлора</label>
           <input id="retailerName" placeholder="Retail Group 1">
         </div>
-        <button onclick="createRetailer()">Создать ритейлора</button>
+        <div class="button-row">
+          <button class="btn-primary" onclick="createRetailer()">Создать ритейлора</button>
+        </div>
         <div id="retailerStatus" class="status">Здесь появится результат создания ритейлора.</div>
-
-        <h3 style="margin:24px 0 12px">Ритейлоры</h3>
-        <div id="retailerList" class="list"></div>
       </div>
 
       <div class="panel">
-        <h2 style="margin-top:0">Создать магазин</h2>
+        <h2 style="margin-top:0;margin-bottom:14px">Создать магазин</h2>
         <div class="field">
           <label for="storeRetailerId">Ритейлор</label>
           <select id="storeRetailerId">
@@ -186,23 +342,67 @@
           <label for="storeCode">Код магазина</label>
           <input id="storeCode" placeholder="SOUTH-01">
         </div>
-        <button onclick="createStore()">Создать магазин</button>
+        <div class="button-row">
+          <button class="btn-primary" onclick="createStore()">Создать магазин</button>
+        </div>
         <div id="storeStatus" class="status">Здесь появится результат создания магазина.</div>
+      </div>
+    </section>
 
-        <h3 style="margin:24px 0 12px">Магазины</h3>
+    <section class="panel">
+      <h2 style="margin-top:0;margin-bottom:14px">Фильтры и поиск</h2>
+      <div class="filter-grid">
+        <div>
+          <label for="filterRetailer">Фильтр по ритейлору</label>
+          <select id="filterRetailer" onchange="syncStoreFilter(); renderAdminData();">
+            <option value="">Все ритейлоры</option>
+          </select>
+        </div>
+        <div>
+          <label for="filterStore">Фильтр по магазину</label>
+          <select id="filterStore" onchange="renderAdminData();">
+            <option value="">Все магазины</option>
+          </select>
+        </div>
+        <div>
+          <label for="searchText">Поиск</label>
+          <input id="searchText" placeholder="ID корзины, товар, код, магазин..." oninput="renderAdminData()">
+        </div>
+      </div>
+    </section>
+
+    <section class="triple-grid">
+      <div class="panel">
+        <h2 style="margin-top:0;margin-bottom:12px">Ритейлоры</h2>
+        <div id="retailerList" class="list"></div>
+      </div>
+
+      <div class="panel">
+        <h2 style="margin-top:0;margin-bottom:12px">Магазины</h2>
         <div id="storeList" class="list"></div>
       </div>
+
+      <div class="panel">
+        <h2 style="margin-top:0;margin-bottom:12px">Все корзины</h2>
+        <div id="basketList" class="list"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 style="margin-top:0;margin-bottom:12px">Магазины и их корзины</h2>
+      <div id="storeOverviewList" class="overview-grid"></div>
     </section>
   </div>
 
   <script>
     let retailers = [];
     let stores = [];
+    let baskets = [];
 
-    async function api(url, method = 'GET', body) {
+    async function api(url, method = "GET", body) {
       const options = { method, headers: {} };
       if (body) {
-        options.headers['Content-Type'] = 'application/json';
+        options.headers["Content-Type"] = "application/json";
         options.body = JSON.stringify(body);
       }
       const res = await fetch(url, options);
@@ -214,19 +414,99 @@
       document.getElementById(id).textContent = text;
     }
 
-    function renderRetailers() {
-      const select = document.getElementById('storeRetailerId');
+    function norm(value) {
+      return String(value || "").toLowerCase();
+    }
+
+    function formatWeight(value) {
+      return `${Number(value || 0).toFixed(1)} г`;
+    }
+
+    function updateStats(filteredBaskets) {
+      document.getElementById("statRetailers").textContent = `${retailers.length}`;
+      document.getElementById("statStores").textContent = `${stores.length}`;
+      document.getElementById("statBaskets").textContent = `${baskets.length}`;
+      document.getElementById("statFiltered").textContent = `${filteredBaskets.length}`;
+    }
+
+    function renderRetailerOptions() {
+      const createSelect = document.getElementById("storeRetailerId");
+      const filterSelect = document.getElementById("filterRetailer");
+
       if (!retailers.length) {
-        select.innerHTML = '<option value="">Ритейлоры не найдены</option>';
-        document.getElementById('retailerList').innerHTML = '<div class="status">Ритейлоры пока не созданы.</div>';
+        createSelect.innerHTML = '<option value="">Сначала создайте или загрузите ритейлора</option>';
+        filterSelect.innerHTML = '<option value="">Все ритейлоры</option>';
         return;
       }
 
-      select.innerHTML = retailers.map(item =>
+      const options = retailers.map((item) =>
         `<option value="${item.retailerId}">${item.name} (${item.pinCode})</option>`
-      ).join('');
+      ).join("");
 
-      document.getElementById('retailerList').innerHTML = retailers.map(item => `
+      createSelect.innerHTML = options;
+      filterSelect.innerHTML = `<option value="">Все ритейлоры</option>${options}`;
+    }
+
+    function syncStoreFilter() {
+      const retailerId = document.getElementById("filterRetailer").value;
+      const storeSelect = document.getElementById("filterStore");
+      const visibleStores = retailerId ? stores.filter((item) => item.retailerId === retailerId) : stores;
+      const previous = storeSelect.value;
+
+      storeSelect.innerHTML = ['<option value="">Все магазины</option>'].concat(
+        visibleStores.map((item) => `<option value="${item.storeId}">${item.storeName}</option>`)
+      ).join("");
+
+      if (visibleStores.some((item) => item.storeId === previous)) {
+        storeSelect.value = previous;
+      }
+    }
+
+    function getFilteredStores() {
+      const retailerId = document.getElementById("filterRetailer").value;
+      const query = norm(document.getElementById("searchText").value);
+
+      return stores.filter((item) => {
+        const retailerOk = !retailerId || item.retailerId === retailerId;
+        const queryOk = !query || [
+          item.storeName,
+          item.location,
+          item.code,
+          item.storeId,
+          item.retailerName
+        ].some((part) => norm(part).includes(query));
+        return retailerOk && queryOk;
+      });
+    }
+
+    function getFilteredBaskets() {
+      const retailerId = document.getElementById("filterRetailer").value;
+      const storeId = document.getElementById("filterStore").value;
+      const query = norm(document.getElementById("searchText").value);
+
+      return baskets.filter((item) => {
+        const retailerOk = !retailerId || item.retailer_id === retailerId;
+        const storeOk = !storeId || item.store_id === storeId;
+        const queryOk = !query || [
+          item.basket_id,
+          item.product_name,
+          item.product_code,
+          item.store_name,
+          item.retailer_name,
+          item.basket_location
+        ].some((part) => norm(part).includes(query));
+        return retailerOk && storeOk && queryOk;
+      });
+    }
+
+    function renderRetailers() {
+      const root = document.getElementById("retailerList");
+      if (!retailers.length) {
+        root.innerHTML = '<div class="empty">Ритейлоры пока не созданы.</div>';
+        return;
+      }
+
+      root.innerHTML = retailers.map((item) => `
         <div class="item">
           <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
             <strong>${item.name}</strong>
@@ -234,79 +514,184 @@
           </div>
           <div class="muted" style="margin-top:8px">${item.retailerId}</div>
         </div>
-      `).join('');
+      `).join("");
     }
 
     function renderStores() {
-      if (!stores.length) {
-        document.getElementById('storeList').innerHTML = '<div class="status">Магазины пока не созданы.</div>';
+      const filteredStores = getFilteredStores();
+      const root = document.getElementById("storeList");
+
+      if (!filteredStores.length) {
+        root.innerHTML = '<div class="empty">Магазины по текущему фильтру не найдены.</div>';
         return;
       }
 
-      document.getElementById('storeList').innerHTML = stores.map(item => `
+      root.innerHTML = filteredStores.map((item) => `
         <div class="item">
           <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
             <strong>${item.storeName}</strong>
-            <span class="pill">${item.code || 'без кода'}</span>
+            <span class="pill">PIN: ${item.pinCode || "-"}</span>
           </div>
-          <div class="muted" style="margin-top:8px">${item.retailerName} · ${item.location || 'Адрес не указан'}</div>
+          <div class="muted" style="margin-top:8px">${item.retailerName} · ${item.location || "Адрес не указан"}</div>
+          <div class="muted" style="margin-top:6px">Код: ${item.code || "без кода"}</div>
           <div class="muted" style="margin-top:6px">${item.storeId}</div>
         </div>
-      `).join('');
+      `).join("");
+    }
+
+    function renderBaskets() {
+      const filteredBaskets = getFilteredBaskets();
+      const root = document.getElementById("basketList");
+      updateStats(filteredBaskets);
+
+      if (!filteredBaskets.length) {
+        root.innerHTML = '<div class="empty">Корзины по текущему фильтру не найдены.</div>';
+        return;
+      }
+
+      root.innerHTML = filteredBaskets.map((item) => `
+        <div class="basket-card">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+            <strong>${item.basket_id}</strong>
+            <span class="pill">${item.product_code || "без кода"}</span>
+          </div>
+          <div class="muted" style="margin-top:8px">${item.product_name || "Товар не указан"}</div>
+          <div class="muted" style="margin-top:6px">${item.retailer_name || "Ритейлор не указан"} · ${item.store_name || "Магазин не указан"}</div>
+          <div class="muted" style="margin-top:6px">${item.basket_location || "Место не указано"}</div>
+          <div class="meta-row" style="margin-top:10px">
+            <span class="pill">Вес: ${formatWeight(item.total_weight)}</span>
+            <span class="pill">Остаток: ${item.quantity ?? 0}</span>
+            <span class="pill">Изъято: ${item.removed_quantity ?? 0}</span>
+            <span class="pill">Заполнение: ${Number(item.fill_percent || 0).toFixed(0)}%</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderStoreOverview() {
+      const root = document.getElementById("storeOverviewList");
+      const filteredStores = getFilteredStores();
+      const filteredBaskets = getFilteredBaskets();
+
+      if (!filteredStores.length) {
+        root.innerHTML = '<div class="empty">Нет магазинов для отображения.</div>';
+        return;
+      }
+
+      root.innerHTML = filteredStores.map((store) => {
+        const storeBaskets = filteredBaskets.filter((basket) => basket.store_id === store.storeId);
+        const totalWeight = storeBaskets.reduce((sum, basket) => sum + Number(basket.total_weight || 0), 0);
+        const totalQuantity = storeBaskets.reduce((sum, basket) => sum + Number(basket.quantity || 0), 0);
+
+        return `
+          <div class="store-overview">
+            <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+              <div>
+                <strong>${store.storeName}</strong>
+                <div class="muted" style="margin-top:6px">${store.retailerName} · ${store.location || "Адрес не указан"}</div>
+              </div>
+              <div class="meta-row">
+                <span class="pill">${store.code || "без кода"}</span>
+                <span class="pill">PIN: ${store.pinCode || "-"}</span>
+                <span class="pill">Корзин: ${storeBaskets.length}</span>
+              </div>
+            </div>
+
+            <div class="meta-row">
+              <span class="pill">Вес всего: ${formatWeight(totalWeight)}</span>
+              <span class="pill">Остаток всего: ${totalQuantity}</span>
+              <span class="pill">${store.storeId}</span>
+            </div>
+
+            <div class="mini-basket-row">
+              ${storeBaskets.length ? storeBaskets.map((basket) => `
+                <div class="mini-basket">
+                  <strong>${basket.basket_id}</strong>
+                  <div class="muted">${basket.product_name || "Товар не указан"}</div>
+                  <div class="muted" style="margin-top:6px">${basket.basket_location || "Место не указано"}</div>
+                  <div class="meta-row" style="margin-top:10px">
+                    <span class="pill">${formatWeight(basket.total_weight)}</span>
+                    <span class="pill">Остаток: ${basket.quantity ?? 0}</span>
+                    <span class="pill">Изъято: ${basket.removed_quantity ?? 0}</span>
+                  </div>
+                </div>
+              `).join("") : '<div class="empty">В этом магазине пока нет активных корзин.</div>'}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderAdminData() {
+      renderStores();
+      renderBaskets();
+      renderStoreOverview();
     }
 
     async function loadRetailers() {
-      const data = await api('/api/admin/retailers');
+      const data = await api("/api/admin/retailers");
       retailers = data.items || [];
+      renderRetailerOptions();
       renderRetailers();
     }
 
     async function loadStores() {
-      const data = await api('/api/admin/stores');
+      const data = await api("/api/admin/stores");
       stores = data.items || [];
+      syncStoreFilter();
       renderStores();
     }
 
+    async function loadBaskets() {
+      const data = await api("/api/baskets");
+      baskets = data.items || [];
+      renderBaskets();
+    }
+
     async function loadAll() {
-      await Promise.all([loadRetailers(), loadStores()]);
+      await Promise.all([loadRetailers(), loadStores(), loadBaskets()]);
+      renderAdminData();
     }
 
     async function createRetailer() {
       try {
-        const name = document.getElementById('retailerName').value.trim();
+        const name = document.getElementById("retailerName").value.trim();
         if (!name) {
-          setStatus('retailerStatus', 'Введите название ритейлора.');
+          setStatus("retailerStatus", "Введите название ритейлора.");
           return;
         }
-        const result = await api('/api/admin/retailers', 'POST', { name });
-        document.getElementById('retailerName').value = '';
-        setStatus('retailerStatus', `Создан ритейлор "${result.name}" с PIN ${result.pinCode}.`);
-        await loadRetailers();
+
+        const result = await api("/api/admin/retailers", "POST", { name });
+        document.getElementById("retailerName").value = "";
+        setStatus("retailerStatus", `Создан ритейлор "${result.name}" с PIN ${result.pinCode}.`);
+        await loadAll();
       } catch (error) {
-        setStatus('retailerStatus', `Ошибка создания ритейлора: ${error.message}`);
+        setStatus("retailerStatus", `Ошибка создания ритейлора: ${error.message}`);
       }
     }
 
     async function createStore() {
       try {
         const payload = {
-          retailerId: document.getElementById('storeRetailerId').value,
-          name: document.getElementById('storeName').value.trim(),
-          location: document.getElementById('storeLocation').value.trim(),
-          code: document.getElementById('storeCode').value.trim()
+          retailerId: document.getElementById("storeRetailerId").value,
+          name: document.getElementById("storeName").value.trim(),
+          location: document.getElementById("storeLocation").value.trim(),
+          code: document.getElementById("storeCode").value.trim()
         };
+
         if (!payload.retailerId || !payload.name) {
-          setStatus('storeStatus', 'Выберите ритейлора и введите название магазина.');
+          setStatus("storeStatus", "Выберите ритейлора и введите название магазина.");
           return;
         }
-        const result = await api('/api/admin/stores', 'POST', payload);
-        document.getElementById('storeName').value = '';
-        document.getElementById('storeLocation').value = '';
-        document.getElementById('storeCode').value = '';
-        setStatus('storeStatus', `Создан магазин "${result.storeName}" для ритейлора ${result.retailerId}.`);
-        await loadStores();
+
+        const result = await api("/api/admin/stores", "POST", payload);
+        document.getElementById("storeName").value = "";
+        document.getElementById("storeLocation").value = "";
+        document.getElementById("storeCode").value = "";
+        setStatus("storeStatus", `Создан магазин "${result.storeName}" для ритейлора ${result.retailerId}.`);
+        await loadAll();
       } catch (error) {
-        setStatus('storeStatus', `Ошибка создания магазина: ${error.message}`);
+        setStatus("storeStatus", `Ошибка создания магазина: ${error.message}`);
       }
     }
 

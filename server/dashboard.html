@@ -2,135 +2,179 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>SmartBasket Monitor</title>
   <style>
     :root {
-      --bg: #f3f7f6;
-      --card: #ffffff;
-      --ink: #14332d;
-      --muted: #5f746f;
-      --line: rgba(20, 51, 45, 0.10);
-      --accent: #0f766e;
-      --accent-soft: rgba(15, 118, 110, 0.10);
-      --ok-bg: rgba(22, 163, 74, 0.12);
-      --ok-ink: #15803d;
-      --warn-bg: rgba(217, 119, 6, 0.12);
-      --warn-ink: #b45309;
-      --danger-bg: rgba(220, 38, 38, 0.12);
-      --danger-ink: #b91c1c;
+      --bg: #07111a;
+      --bg-soft: #0d1822;
+      --card: rgba(15, 26, 38, 0.94);
+      --card-2: rgba(11, 20, 30, 0.96);
+      --line: rgba(147, 197, 253, 0.12);
+      --ink: #e6f0ff;
+      --muted: #8aa0ba;
+      --accent: #19c2a7;
+      --accent-2: #5fb4ff;
+      --ok-bg: rgba(67, 209, 125, 0.14);
+      --ok-ink: #7af0a8;
+      --warn-bg: rgba(255, 184, 77, 0.14);
+      --warn-ink: #ffd08a;
+      --danger-bg: rgba(255, 107, 122, 0.16);
+      --danger-ink: #ff9ba6;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+      --radius: 24px;
     }
 
     * { box-sizing: border-box; }
 
-    body {
+    html, body {
       margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
+      min-height: 100%;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(circle at top left, rgba(15,118,110,0.12), transparent 24%),
-        linear-gradient(180deg, #f8fbfa 0%, var(--bg) 100%);
+        radial-gradient(circle at top left, rgba(25, 194, 167, 0.16), transparent 24%),
+        radial-gradient(circle at top right, rgba(95, 180, 255, 0.12), transparent 28%),
+        linear-gradient(180deg, #09131c 0%, var(--bg) 100%);
     }
 
+    body { padding: 18px 14px 32px; }
+
     .shell {
-      max-width: 1280px;
+      width: min(1280px, 100%);
       margin: 0 auto;
-      padding: 24px 16px 40px;
+      display: grid;
+      gap: 16px;
     }
 
     .hero,
     .panel,
-    .basket-card {
-      background: rgba(255,255,255,0.94);
+    .basket-card,
+    .detail-card,
+    .history-item {
+      background: linear-gradient(180deg, rgba(18, 30, 42, 0.98) 0%, rgba(10, 18, 28, 0.96) 100%);
       border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: 0 18px 50px rgba(18, 52, 45, 0.08);
-      backdrop-filter: blur(8px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
     }
 
     .hero {
-      padding: 24px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 20px;
+      display: grid;
       gap: 16px;
-      flex-wrap: wrap;
     }
 
-    .hero h1 {
-      margin: 0 0 8px;
-      font-size: 28px;
+    .eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      font-weight: 700;
     }
 
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+      max-width: 14ch;
+    }
+
+    .hero p,
     .muted {
       color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      min-height: 46px;
+      padding: 11px 16px;
+      border-radius: 999px;
+      border: 0;
+      font: inherit;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: transform 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    button:active { transform: translateY(1px) scale(0.99); }
+
+    .btn-primary {
+      color: #041119;
+      background: linear-gradient(135deg, var(--accent) 0%, #7cf0de 100%);
+      box-shadow: 0 10px 26px rgba(25, 194, 167, 0.22);
+    }
+
+    .btn-secondary {
+      color: var(--ink);
+      background: rgba(95, 180, 255, 0.12);
+      border: 1px solid rgba(95, 180, 255, 0.16);
     }
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
-      margin-bottom: 20px;
     }
 
-    .panel {
-      padding: 18px;
-    }
+    .panel { padding: 18px; }
 
     .stat-label {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
       color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       margin-bottom: 8px;
     }
 
     .stat-value {
-      font-size: 30px;
+      font-size: clamp(24px, 4vw, 34px);
+      letter-spacing: -0.05em;
       font-weight: 700;
-      letter-spacing: -0.04em;
     }
 
     .layout {
       display: grid;
-      grid-template-columns: 1.3fr 0.9fr;
-      gap: 20px;
+      gap: 16px;
     }
 
-    .basket-list {
+    .basket-list,
+    .history {
       display: grid;
-      gap: 14px;
+      gap: 12px;
     }
 
     .basket-card {
       padding: 18px;
       cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-      border-left-width: 6px;
+      transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+      border-left: 6px solid transparent;
+      border-radius: 22px;
     }
 
     .basket-card:hover {
       transform: translateY(-2px);
-      border-color: rgba(15,118,110,0.30);
+      border-color: rgba(95, 180, 255, 0.3);
     }
 
     .basket-card.active {
-      box-shadow: 0 20px 40px rgba(15,118,110,0.12);
-      background: linear-gradient(180deg, #ffffff 0%, #f5fbfa 100%);
+      box-shadow: 0 20px 40px rgba(25, 194, 167, 0.12);
+      border-color: rgba(25, 194, 167, 0.45);
     }
 
-    .status-ok {
-      border-left-color: rgba(22, 163, 74, 0.55);
-    }
-
-    .status-low {
-      border-left-color: rgba(217, 119, 6, 0.55);
-    }
-
-    .status-empty {
-      border-left-color: rgba(220, 38, 38, 0.55);
-    }
+    .status-ok { border-left-color: rgba(67, 209, 125, 0.65); }
+    .status-low { border-left-color: rgba(255, 184, 77, 0.65); }
+    .status-empty { border-left-color: rgba(255, 107, 122, 0.7); }
 
     .basket-head {
       display: flex;
@@ -145,9 +189,10 @@
       font-size: 18px;
     }
 
-    .basket-grid {
+    .basket-grid,
+    .detail-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
     }
 
@@ -163,8 +208,9 @@
     }
 
     .pill {
-      background: var(--accent-soft);
-      color: var(--accent);
+      background: rgba(95, 180, 255, 0.12);
+      color: #a9d4ff;
+      border: 1px solid rgba(95, 180, 255, 0.14);
     }
 
     .status-pill.status-ok {
@@ -182,18 +228,11 @@
       color: var(--danger-ink);
     }
 
-    .detail-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .detail-card {
+    .detail-card,
+    .history-item {
       padding: 14px;
       border-radius: 18px;
-      background: #f8fbfa;
-      border: 1px solid var(--line);
+      background: rgba(13, 24, 34, 0.9);
     }
 
     .detail-card strong {
@@ -204,28 +243,9 @@
 
     .history {
       margin-top: 18px;
-      display: grid;
-      gap: 10px;
-      max-height: 360px;
+      max-height: 420px;
       overflow: auto;
       padding-right: 4px;
-    }
-
-    .history-item {
-      padding: 12px;
-      border-radius: 16px;
-      background: #f8fbfa;
-      border: 1px solid var(--line);
-    }
-
-    button {
-      border: 0;
-      border-radius: 999px;
-      background: var(--accent);
-      color: white;
-      padding: 10px 16px;
-      cursor: pointer;
-      font-weight: 600;
     }
 
     .empty {
@@ -234,12 +254,29 @@
       color: var(--muted);
       border: 1px dashed var(--line);
       border-radius: 20px;
-      background: rgba(255,255,255,0.6);
+      background: rgba(11, 20, 30, 0.76);
     }
 
-    @media (max-width: 960px) {
+    .section-title {
+      margin-top: 0;
+      margin-bottom: 14px;
+      letter-spacing: -0.03em;
+    }
+
+    @media (min-width: 700px) {
+      body { padding: 22px 18px 36px; }
+      .hero {
+        grid-template-columns: 1.4fr auto;
+        align-items: end;
+      }
+      .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .basket-grid,
+      .detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (min-width: 1024px) {
       .layout {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1.3fr 0.95fr;
       }
     }
   </style>
@@ -248,11 +285,13 @@
   <div class="shell">
     <section class="hero">
       <div>
-        <h1>Мониторинг корзин SmartBasket</h1>
-        <div class="muted">Сервер показывает текущее состояние корзин, общий вес, остаток товара и историю последних сообщений.</div>
+        <div class="eyebrow">SmartBasket</div>
+        <h1>Мониторинг корзин</h1>
+        <p>Сервер показывает текущее состояние корзин, общий вес, остаток товара и историю последних сообщений.</p>
       </div>
-      <div>
-        <button onclick="refreshAll()">Обновить</button>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="refreshAll()">Обновить</button>
+        <a href="/admin" style="text-decoration:none"><button type="button" class="btn-secondary">Админка</button></a>
       </div>
     </section>
 
@@ -277,12 +316,12 @@
 
     <section class="layout">
       <div class="panel">
-        <h2 style="margin-top:0">Корзины</h2>
+        <h2 class="section-title">Корзины</h2>
         <div id="basketList" class="basket-list"></div>
       </div>
 
       <div class="panel">
-        <h2 style="margin-top:0">Детали корзины</h2>
+        <h2 class="section-title">Детали корзины</h2>
         <div id="basketDetail" class="empty">Выберите корзину слева</div>
       </div>
     </section>
@@ -294,24 +333,20 @@
 
     function num(value, digits = 1) {
       const v = Number(value ?? 0);
-      return Number.isFinite(v) ? v.toFixed(digits) : '0';
+      return Number.isFinite(v) ? v.toFixed(digits) : "0";
     }
 
     function ts(value) {
-      if (!value) return '-';
-      const d = new Date(value.replace(' ', 'T'));
+      if (!value) return "-";
+      const d = new Date(String(value).replace(" ", "T"));
       return Number.isNaN(d.getTime()) ? value : d.toLocaleString();
     }
 
     function getStatus(fillPercent) {
       const value = Number(fillPercent || 0);
-      if (value <= 10) {
-        return { cls: 'status-empty', label: 'Почти пусто' };
-      }
-      if (value <= 35) {
-        return { cls: 'status-low', label: 'Мало товара' };
-      }
-      return { cls: 'status-ok', label: 'Норма' };
+      if (value <= 10) return { cls: "status-empty", label: "Почти пусто" };
+      if (value <= 35) return { cls: "status-low", label: "Мало товара" };
+      return { cls: "status-ok", label: "Норма" };
     }
 
     async function api(url) {
@@ -324,43 +359,43 @@
       const totalWeight = items.reduce((sum, item) => sum + Number(item.total_weight || 0), 0);
       const totalQuantity = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
       const latest = items.length ? items[0].updated_at : null;
-      document.getElementById('statBaskets').textContent = `${items.length}`;
-      document.getElementById('statWeight').textContent = `${num(totalWeight)} г`;
-      document.getElementById('statQuantity').textContent = `${totalQuantity}`;
-      document.getElementById('statUpdated').textContent = ts(latest);
+      document.getElementById("statBaskets").textContent = `${items.length}`;
+      document.getElementById("statWeight").textContent = `${num(totalWeight)} г`;
+      document.getElementById("statQuantity").textContent = `${totalQuantity}`;
+      document.getElementById("statUpdated").textContent = ts(latest);
     }
 
     function renderList(items) {
-      const root = document.getElementById('basketList');
+      const root = document.getElementById("basketList");
       if (!items.length) {
         root.innerHTML = '<div class="empty">Данные от корзин еще не поступали</div>';
         return;
       }
 
-      root.innerHTML = items.map(item => {
+      root.innerHTML = items.map((item) => {
         const status = getStatus(item.fill_percent);
         return `
-          <article class="basket-card ${status.cls} ${selectedBasketId === item.basket_id ? 'active' : ''}" onclick="selectBasket('${item.basket_id}')">
+          <article class="basket-card ${status.cls} ${selectedBasketId === item.basket_id ? "active" : ""}" onclick="selectBasket('${item.basket_id}')">
             <div class="basket-head">
               <div>
                 <div class="basket-id">${item.basket_id}</div>
-                <div class="muted">${item.product_name || 'Без названия товара'}</div>
+                <div class="muted">${item.product_name || "Без названия товара"}</div>
               </div>
               <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
                 <span class="status-pill ${status.cls}">${status.label}</span>
-                <span class="pill">${item.product_code || 'без кода'}</span>
+                <span class="pill">${item.product_code || "без кода"}</span>
               </div>
             </div>
-            <div class="muted" style="margin-bottom:12px">${item.basket_location || 'Место не указано'}</div>
+            <div class="muted" style="margin-bottom:12px">${item.store_name || "Магазин не указан"} · ${item.basket_location || "Место не указано"}</div>
             <div class="basket-grid">
               <div><div class="stat-label">Вес</div><strong>${num(item.total_weight)} г</strong></div>
               <div><div class="stat-label">Остаток</div><strong>${item.quantity ?? 0}</strong></div>
               <div><div class="stat-label">Изъято</div><strong>${item.removed_quantity ?? 0}</strong></div>
-              <div><div class="stat-label">Заполнение</div><strong>${num(item.fill_percent, 0)} %</strong></div>
+              <div><div class="stat-label">Заполненность</div><strong>${num(item.fill_percent, 0)} %</strong></div>
             </div>
           </article>
         `;
-      }).join('');
+      }).join("");
     }
 
     async function selectBasket(basketId) {
@@ -373,46 +408,46 @@
       ]);
 
       const status = getStatus(basket.fillPercent);
-      const root = document.getElementById('basketDetail');
-      root.className = '';
+      const root = document.getElementById("basketDetail");
+      root.className = "";
       root.innerHTML = `
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <div class="pill">${basket.mode === 'pieces' ? 'Режим: штуки' : 'Режим: масса'}</div>
+          <div class="pill">${basket.mode === "pieces" ? "Режим: штуки" : "Режим: масса"}</div>
           <div class="status-pill ${status.cls}">${status.label}</div>
         </div>
-        <h3 style="margin-bottom:6px">${basket.productName || 'Без названия'}</h3>
-        <div class="muted">${basket.basketId} · ${basket.basketLocation || 'Место не указано'}</div>
+        <h3 style="margin:14px 0 6px">${basket.productName || "Без названия"}</h3>
+        <div class="muted">${basket.basketId} · ${basket.storeName || "Магазин не указан"} · ${basket.basketLocation || "Место не указано"}</div>
 
-        <div class="detail-grid">
+        <div class="detail-grid" style="margin-top:14px">
           <div class="detail-card"><span class="muted">Общий вес</span><strong>${num(basket.totalWeight)} г</strong></div>
           <div class="detail-card"><span class="muted">Остаток</span><strong>${basket.quantity ?? 0}</strong></div>
           <div class="detail-card"><span class="muted">Было изначально</span><strong>${basket.fullQuantity ?? 0}</strong></div>
           <div class="detail-card"><span class="muted">Изъято</span><strong>${basket.removedQuantity ?? 0}</strong></div>
           <div class="detail-card"><span class="muted">Вес одной штуки</span><strong>${num(basket.unitWeight)} г</strong></div>
           <div class="detail-card"><span class="muted">Полный вес</span><strong>${num(basket.fullWeight)} г</strong></div>
-          <div class="detail-card"><span class="muted">Заполнение</span><strong>${num(basket.fillPercent, 0)} %</strong></div>
+          <div class="detail-card"><span class="muted">Заполненность</span><strong>${num(basket.fillPercent, 0)} %</strong></div>
           <div class="detail-card"><span class="muted">Температура / влажность</span><strong>${num(basket.temperature)} C / ${num(basket.humidity, 0)} %</strong></div>
         </div>
 
         <h3 style="margin:18px 0 10px">Последние события</h3>
         <div class="history">
-          ${(history.items || []).map(item => `
+          ${(history.items || []).map((item) => `
             <div class="history-item">
-              <div style="display:flex;justify-content:space-between;gap:12px">
+              <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
                 <strong>${num(item.totalWeight)} г · ${item.quantity ?? 0} шт</strong>
                 <span class="muted">${ts(item.receivedAt)}</span>
               </div>
               <div class="muted" style="margin-top:6px">
-                ${item.productName || 'Товар не указан'} · ${item.productCode || 'без кода'} · заполнение ${num(item.fillPercent, 0)} %
+                ${item.productName || "Товар не указан"} · ${item.productCode || "без кода"} · заполнение ${num(item.fillPercent, 0)} %
               </div>
             </div>
-          `).join('') || '<div class="empty">История пока пуста</div>'}
+          `).join("") || '<div class="empty">История пока пуста</div>'}
         </div>
       `;
     }
 
     async function refreshAll() {
-      const data = await api('/api/baskets');
+      const data = await api("/api/baskets");
       basketItems = data.items || [];
       renderStats(basketItems);
       renderList(basketItems);
@@ -422,7 +457,7 @@
         return;
       }
 
-      if (selectedBasketId && basketItems.some(item => item.basket_id === selectedBasketId)) {
+      if (selectedBasketId && basketItems.some((item) => item.basket_id === selectedBasketId)) {
         await selectBasket(selectedBasketId);
       }
     }

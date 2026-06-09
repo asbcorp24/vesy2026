@@ -13,6 +13,7 @@ class BasketStorage:
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
+        self._migrate_db()
         self._ensure_demo_data()
 
     def _connect(self) -> sqlite3.Connection:
@@ -37,6 +38,7 @@ class BasketStorage:
                     name TEXT NOT NULL,
                     location TEXT,
                     code TEXT,
+                    pin_code TEXT UNIQUE,
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (retailer_id) REFERENCES retailers (retailer_id)
                 );
@@ -90,6 +92,25 @@ class BasketStorage:
                 """
             )
 
+    def _migrate_db(self) -> None:
+        with self._connect() as conn:
+            columns = {
+                row["name"]
+                for row in conn.execute("PRAGMA table_info(stores)").fetchall()
+            }
+            if "pin_code" not in columns:
+                conn.execute("ALTER TABLE stores ADD COLUMN pin_code TEXT")
+            conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_stores_pin_code ON stores(pin_code)")
+
+            rows = conn.execute("SELECT store_id, pin_code FROM stores").fetchall()
+            for row in rows:
+                if row["pin_code"]:
+                    continue
+                conn.execute(
+                    "UPDATE stores SET pin_code = ? WHERE store_id = ?",
+                    (self._generate_unique_store_pin(conn), row["store_id"]),
+                )
+
     def _ensure_demo_data(self) -> None:
         with self._connect() as conn:
             existing = conn.execute("SELECT COUNT(*) AS cnt FROM retailers").fetchone()["cnt"]
@@ -97,22 +118,32 @@ class BasketStorage:
                 return
 
             retailer_id = "retailer-01"
-            pin_code = "482615"
+            retailer_pin = "482615"
             conn.execute(
                 "INSERT INTO retailers (retailer_id, name, pin_code) VALUES (?, ?, ?)",
-                (retailer_id, "Demo Retailer", pin_code),
+                (retailer_id, "Demo Retailer", retailer_pin),
             )
             stores = [
-                ("store-01", retailer_id, "Магазин Центр", "Москва, Тверская", "CTR-01"),
-                ("store-02", retailer_id, "Магазин Север", "Москва, Складочная", "NTH-02"),
+                ("store-01", retailer_id, "Магазин Центр", "Москва, Тверская", "CTR-01", "310101"),
+                ("store-02", retailer_id, "Магазин Север", "Москва, Складочная", "NTH-02", "310102"),
             ]
             conn.executemany(
-                "INSERT INTO stores (store_id, retailer_id, name, location, code) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO stores (store_id, retailer_id, name, location, code, pin_code) VALUES (?, ?, ?, ?, ?, ?)",
                 stores,
             )
 
     def _generate_pin(self) -> str:
         return "".join(random.choice(string.digits) for _ in range(6))
+
+    def _generate_unique_store_pin(self, conn: sqlite3.Connection) -> str:
+        while True:
+            pin_code = self._generate_pin()
+            exists = conn.execute(
+                "SELECT 1 FROM stores WHERE pin_code = ?",
+                (pin_code,),
+            ).fetchone()
+            if exists is None:
+                return pin_code
 
     def create_retailer(self, name: str) -> dict[str, Any]:
         retailer_id = f"retailer-{random.randint(1000, 9999)}"
@@ -152,9 +183,11 @@ class BasketStorage:
             ).fetchone()
             if retailer is None:
                 raise ValueError("Retailer not found")
+
+            pin_code = self._generate_unique_store_pin(conn)
             conn.execute(
-                "INSERT INTO stores (store_id, retailer_id, name, location, code) VALUES (?, ?, ?, ?, ?)",
-                (store_id, retailer_id, name, location, code),
+                "INSERT INTO stores (store_id, retailer_id, name, location, code, pin_code) VALUES (?, ?, ?, ?, ?, ?)",
+                (store_id, retailer_id, name, location, code, pin_code),
             )
         return {
             "storeId": store_id,
@@ -162,6 +195,7 @@ class BasketStorage:
             "storeName": name,
             "location": location,
             "code": code,
+            "pinCode": pin_code,
         }
 
     def list_stores(self, retailer_id: str | None = None) -> list[dict[str, Any]]:
@@ -169,7 +203,7 @@ class BasketStorage:
             if retailer_id:
                 rows = conn.execute(
                     """
-                    SELECT s.store_id, s.retailer_id, r.name AS retailer_name, s.name, s.location, s.code, s.created_at
+                    SELECT s.store_id, s.retailer_id, r.name AS retailer_name, s.name, s.location, s.code, s.pin_code, s.created_at
                     FROM stores s
                     JOIN retailers r ON r.retailer_id = s.retailer_id
                     WHERE s.retailer_id = ?
@@ -180,7 +214,7 @@ class BasketStorage:
             else:
                 rows = conn.execute(
                     """
-                    SELECT s.store_id, s.retailer_id, r.name AS retailer_name, s.name, s.location, s.code, s.created_at
+                    SELECT s.store_id, s.retailer_id, r.name AS retailer_name, s.name, s.location, s.code, s.pin_code, s.created_at
                     FROM stores s
                     JOIN retailers r ON r.retailer_id = s.retailer_id
                     ORDER BY s.created_at DESC, s.name ASC
@@ -194,6 +228,7 @@ class BasketStorage:
                 "storeName": row["name"],
                 "location": row["location"] or "",
                 "code": row["code"] or "",
+                "pinCode": row["pin_code"] or "",
                 "createdAt": row["created_at"],
             }
             for row in rows
@@ -209,7 +244,7 @@ class BasketStorage:
                 return None
             stores = conn.execute(
                 """
-                SELECT store_id, name, location, code
+                SELECT store_id, name, location, code, pin_code
                 FROM stores
                 WHERE retailer_id = ?
                 ORDER BY name
@@ -227,9 +262,44 @@ class BasketStorage:
                     "storeName": row["name"],
                     "location": row["location"] or "",
                     "code": row["code"] or "",
+                    "pinCode": row["pin_code"] or "",
                 }
                 for row in stores
             ],
+        }
+
+    def get_store_by_pin(self, pin_code: str) -> dict[str, Any] | None:
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT
+                    s.store_id,
+                    s.name AS store_name,
+                    s.location,
+                    s.code,
+                    s.pin_code,
+                    r.retailer_id,
+                    r.name AS retailer_name,
+                    r.pin_code AS retailer_pin
+                FROM stores s
+                JOIN retailers r ON r.retailer_id = s.retailer_id
+                WHERE s.pin_code = ?
+                """,
+                (pin_code,),
+            ).fetchone()
+
+        if row is None:
+            return None
+
+        return {
+            "storeId": row["store_id"],
+            "storeName": row["store_name"],
+            "location": row["location"] or "",
+            "code": row["code"] or "",
+            "storePin": row["pin_code"] or "",
+            "retailerId": row["retailer_id"],
+            "retailerName": row["retailer_name"],
+            "retailerPin": row["retailer_pin"] or "",
         }
 
     def register_basket(
@@ -244,6 +314,12 @@ class BasketStorage:
         product_code: str,
     ) -> dict[str, Any]:
         with self._connect() as conn:
+            store = conn.execute(
+                "SELECT pin_code FROM stores WHERE store_id = ?",
+                (store_id,),
+            ).fetchone()
+            store_pin = store["pin_code"] if store else ""
+
             conn.execute(
                 """
                 INSERT INTO basket_registry (
@@ -286,6 +362,7 @@ class BasketStorage:
             "retailerName": retailer_name,
             "storeId": store_id,
             "storeName": store_name,
+            "storePin": store_pin,
             "basketLocation": basket_location,
             "productName": product_name,
             "productCode": product_code,

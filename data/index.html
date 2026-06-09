@@ -2,314 +2,476 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>SmartBasket</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     :root {
-      --sb-bg: #eef4f1;
-      --sb-card: #ffffff;
-      --sb-ink: #102a24;
-      --sb-accent: #0f766e;
-      --sb-muted: #5b6b67;
+      --bg: #07111a;
+      --bg-soft: #0d1822;
+      --line: rgba(147, 197, 253, 0.12);
+      --ink: #e6f0ff;
+      --muted: #8aa0ba;
+      --accent: #19c2a7;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+      --radius: 24px;
     }
 
-    body {
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+      color: var(--ink);
       background:
-        radial-gradient(circle at top left, rgba(15,118,110,0.12), transparent 28%),
-        linear-gradient(180deg, #f7fbfa 0%, var(--sb-bg) 100%);
-      color: var(--sb-ink);
-      min-height: 100vh;
+        radial-gradient(circle at top left, rgba(25, 194, 167, 0.16), transparent 24%),
+        radial-gradient(circle at top right, rgba(95, 180, 255, 0.12), transparent 28%),
+        linear-gradient(180deg, #09131c 0%, var(--bg) 100%);
     }
+
+    body { padding: 18px 14px 32px; }
 
     .shell {
-      max-width: 1120px;
+      width: min(1180px, 100%);
       margin: 0 auto;
-      padding: 24px 16px 48px;
+      display: grid;
+      gap: 16px;
     }
 
     .hero,
-    .panel {
-      background: rgba(255,255,255,0.92);
+    .panel,
+    .metric-card,
+    .status-box {
+      background: linear-gradient(180deg, rgba(18, 30, 42, 0.98) 0%, rgba(10, 18, 28, 0.96) 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(16,42,36,0.08);
-      border-radius: 24px;
-      box-shadow: 0 18px 50px rgba(18, 52, 45, 0.08);
     }
 
-    .hero {
-      padding: 24px;
-      margin-bottom: 20px;
-    }
+    .hero { padding: 20px; display: grid; gap: 16px; }
 
-    .panel {
-      padding: 20px;
-      height: 100%;
-    }
-
-    .metric {
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: -0.04em;
-    }
-
-    .label {
-      color: var(--sb-muted);
-      font-size: 0.9rem;
+    .eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      font-weight: 700;
     }
 
-    .btn-sb {
-      background: var(--sb-accent);
-      border: none;
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+      max-width: 12ch;
+    }
+
+    .hero p { color: var(--muted); margin-top: 10px; max-width: 60ch; line-height: 1.5; }
+
+    .hero-actions,
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric-card {
+      padding: 16px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(19, 31, 46, 0.98) 0%, rgba(11, 20, 30, 0.98) 100%);
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: clamp(24px, 4vw, 34px);
+      letter-spacing: -0.05em;
+      font-weight: 700;
+    }
+
+    .layout,
+    .form-grid,
+    .grid-2,
+    .grid-3,
+    .grid-4 { display: grid; gap: 16px; }
+
+    .panel { padding: 18px; }
+
+    .panel h2 {
+      font-size: 18px;
+      margin-bottom: 14px;
+      letter-spacing: -0.03em;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(138, 160, 186, 0.16);
+      background: var(--bg-soft);
+      color: var(--ink);
+      font: inherit;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(25, 194, 167, 0.56);
+      box-shadow: 0 0 0 3px rgba(25, 194, 167, 0.12);
+    }
+
+    input::placeholder { color: #66819c; }
+
+    button {
+      min-height: 46px;
+      padding: 11px 16px;
       border-radius: 999px;
-      padding-inline: 18px;
+      border: 0;
+      font: inherit;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      color: #041119;
+      background: linear-gradient(135deg, var(--accent) 0%, #7cf0de 100%);
+      box-shadow: 0 10px 26px rgba(25, 194, 167, 0.22);
+    }
+
+    .btn-secondary {
+      color: var(--ink);
+      background: rgba(95, 180, 255, 0.12);
+      border: 1px solid rgba(95, 180, 255, 0.16);
     }
 
     .status-box {
-      background: #f7fbfa;
-      border: 1px solid rgba(16,42,36,0.10);
-      border-radius: 16px;
-      padding: 12px 14px;
-      color: var(--sb-muted);
+      padding: 14px 16px;
+      border-radius: 18px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
       min-height: 48px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--bg-soft);
+      border: 1px solid rgba(138, 160, 186, 0.16);
+    }
+
+    .switch-row span { color: var(--ink); }
+
+    .switch { position: relative; width: 52px; height: 30px; flex: 0 0 auto; }
+    .switch input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+    .slider { position: absolute; inset: 0; border-radius: 999px; background: rgba(95, 180, 255, 0.18); }
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      left: 4px;
+      top: 4px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.2s ease;
+    }
+    .switch input:checked + .slider { background: rgba(25, 194, 167, 0.44); }
+    .switch input:checked + .slider::before { transform: translateX(22px); }
+
+    .tiny { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.45; }
+
+    @media (min-width: 700px) {
+      body { padding: 22px 18px 36px; }
+      .hero { grid-template-columns: 1.4fr auto; align-items: end; }
+      .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+
+    @media (min-width: 1024px) {
+      .layout { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .full { grid-column: 1 / -1; }
     }
   </style>
 </head>
 <body>
   <div class="shell">
     <section class="hero">
-      <div class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center">
-        <div>
-          <div class="label mb-2">SmartBasket</div>
-          <h1 class="h3 mb-2">Регистрация и учет корзины</h1>
-          <p class="mb-0 text-secondary">Корзина регистрируется в ритейлере по PIN, выбирает магазин и затем отправляет остатки товара уже в нужную структуру.</p>
-        </div>
-        <div class="d-flex gap-2">
-          <button class="btn btn-sb text-white" onclick="refreshStatus()">Обновить</button>
-          <button class="btn btn-outline-secondary rounded-pill" onclick="sendNow()">Отправить</button>
-        </div>
+      <div>
+        <div class="eyebrow">SmartBasket</div>
+        <h1>Темная панель корзины</h1>
+        <p>Интерфейс полностью загружается с ESP32 через LittleFS. Регистрация корзины теперь выполняется по PIN конкретного магазина.</p>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="refreshStatus()">Обновить</button>
+        <button class="btn-secondary" onclick="sendNow()">Отправить сейчас</button>
       </div>
     </section>
 
-    <div class="row g-3 mb-3">
-      <div class="col-6 col-lg-3"><div class="panel"><div class="label">Общий вес</div><div class="metric" id="weight">0.0 г</div></div></div>
-      <div class="col-6 col-lg-3"><div class="panel"><div class="label">Остаток штук</div><div class="metric" id="quantity">0</div></div></div>
-      <div class="col-6 col-lg-3"><div class="panel"><div class="label">Было штук</div><div class="metric" id="fullQuantity">0</div></div></div>
-      <div class="col-6 col-lg-3"><div class="panel"><div class="label">Изъято штук</div><div class="metric" id="removedQuantity">0</div></div></div>
-    </div>
+    <section class="metrics">
+      <div class="metric-card"><div class="metric-label">Общий вес</div><div class="metric-value" id="weight">0.0 г</div></div>
+      <div class="metric-card"><div class="metric-label">Остаток штук</div><div class="metric-value" id="quantity">0</div></div>
+      <div class="metric-card"><div class="metric-label">Было штук</div><div class="metric-value" id="fullQuantity">0</div></div>
+      <div class="metric-card"><div class="metric-label">Изъято штук</div><div class="metric-value" id="removedQuantity">0</div></div>
+      <div class="metric-card"><div class="metric-label">Заполненность</div><div class="metric-value" id="fillPercent">0 %</div></div>
+      <div class="metric-card"><div class="metric-label">Температура</div><div class="metric-value" id="temp">0.0 C</div></div>
+      <div class="metric-card"><div class="metric-label">Влажность</div><div class="metric-value" id="humidity">0 %</div></div>
+      <div class="metric-card"><div class="metric-label">Корзина</div><div class="metric-value" id="basketMeta" style="font-size:20px">-</div></div>
+    </section>
 
-    <div class="row g-3 mb-3">
-      <div class="col-6 col-lg-3"><div class="panel"><div class="label">Заполнение</div><div class="metric" id="fillPercent">0 %</div></div></div>
-      <div class="col-6 col-lg-3"><div class="panel"><div class="label">Температура</div><div class="metric" id="temp">0.0 C</div></div></div>
-      <div class="col-6 col-lg-3"><div class="panel"><div class="label">Влажность</div><div class="metric" id="humidity">0 %</div></div></div>
-      <div class="col-6 col-lg-3"><div class="panel"><div class="label">Корзина</div><div class="metric fs-5" id="basketMeta">-</div></div></div>
-    </div>
+    <section class="layout">
+      <article class="panel full">
+        <h2>Регистрация корзины</h2>
+        <div class="form-grid">
+          <div class="grid-4">
+            <div>
+              <label for="registrationServerUrl">Сервер регистрации</label>
+              <input id="registrationServerUrl" placeholder="http://192.168.1.50:8000">
+            </div>
+            <div>
+              <label for="storePin">PIN магазина</label>
+              <input id="storePin" placeholder="310101">
+            </div>
+            <div>
+              <label for="storeNamePreview">Найденный магазин</label>
+              <input id="storeNamePreview" placeholder="Сначала введите PIN магазина" readonly>
+            </div>
+            <div class="button-row" style="align-items:end">
+              <button class="btn-primary" onclick="loadStoreByPin()">Найти магазин</button>
+            </div>
+          </div>
 
-    <div class="row g-3">
-      <div class="col-12">
-        <div class="panel">
-          <h2 class="h5 mb-3">Регистрация корзины в ритейлере</h2>
-          <div class="row g-3">
-            <div class="col-12 col-lg-4">
-              <label class="form-label">Сервер регистрации</label>
-              <input id="registrationServerUrl" class="form-control" placeholder="http://192.168.1.50:8000">
+          <div class="grid-4">
+            <div>
+              <label for="basketId">ID корзины</label>
+              <input id="basketId" placeholder="basket-01">
             </div>
-            <div class="col-12 col-lg-3">
-              <label class="form-label">PIN ритейлора</label>
-              <input id="retailerPin" class="form-control" placeholder="482615">
+            <div>
+              <label for="basketLocation">Расположение корзины</label>
+              <input id="basketLocation" placeholder="Зал 1 / Полка 4">
             </div>
-            <div class="col-12 col-lg-2 d-flex align-items-end">
-              <button class="btn btn-sb text-white w-100" onclick="loadStoresByPin()">Получить магазины</button>
+            <div>
+              <label for="productName">Название товара</label>
+              <input id="productName" placeholder="Яблоко">
             </div>
-            <div class="col-12 col-lg-3">
-              <label class="form-label">Магазин</label>
-              <select id="storeSelect" class="form-select">
-                <option value="">Сначала введите PIN</option>
-              </select>
+            <div>
+              <label for="productCode">Код товара</label>
+              <input id="productCode" placeholder="APL-001">
             </div>
           </div>
-          <div class="row g-3 mt-1">
-            <div class="col-12 col-lg-3">
-              <label class="form-label">ID корзины</label>
-              <input id="basketId" class="form-control" placeholder="basket-01">
-            </div>
-            <div class="col-12 col-lg-4">
-              <label class="form-label">Расположение корзины</label>
-              <input id="basketLocation" class="form-control" placeholder="Зал 1 / Полка 4">
-            </div>
-            <div class="col-12 col-lg-3">
-              <label class="form-label">Название товара</label>
-              <input id="productName" class="form-control" placeholder="Яблоко">
-            </div>
-            <div class="col-12 col-lg-2">
-              <label class="form-label">Код товара</label>
-              <input id="productCode" class="form-control" placeholder="APL-001">
-            </div>
+
+          <div class="button-row">
+            <button class="btn-primary" onclick="registerBasket()">Зарегистрировать корзину</button>
+            <button class="btn-secondary" onclick="saveSettings()">Сохранить локально</button>
           </div>
-          <div class="d-flex flex-wrap gap-2 mt-3">
-            <button class="btn btn-sb text-white" onclick="registerBasket()">Зарегистрировать корзину</button>
-            <button class="btn btn-outline-secondary rounded-pill" onclick="saveSettings()">Сохранить локально</button>
-          </div>
-          <div id="registrationStatus" class="status-box mt-3">Корзина еще не зарегистрирована на сервере ритейлора.</div>
+
+          <div id="registrationStatus" class="status-box">Корзина еще не зарегистрирована на сервере магазина.</div>
         </div>
-      </div>
+      </article>
 
-      <div class="col-12 col-lg-6">
-        <div class="panel">
-          <h2 class="h5 mb-3">Параметры взвешивания</h2>
-          <div class="mb-3">
-            <label class="form-label">Режим</label>
-            <select id="mode" class="form-select">
+      <article class="panel">
+        <h2>Параметры взвешивания</h2>
+        <div class="form-grid">
+          <div>
+            <label for="mode">Режим</label>
+            <select id="mode">
               <option value="mass">Масса</option>
               <option value="pieces">Штуки</option>
             </select>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Вес одного продукта, г</label>
-            <input id="unitWeight" type="number" class="form-control" value="100">
+          <div class="grid-2">
+            <div>
+              <label for="unitWeight">Вес одного продукта, г</label>
+              <input id="unitWeight" type="number" value="100">
+              <div class="tiny">Положите одну штуку на корзину и снимите вес с датчиков.</div>
+            </div>
+            <div>
+              <label for="fullWeight">Полный вес корзины, г</label>
+              <input id="fullWeight" type="number" value="0">
+              <div class="tiny">Если корзина заполнена, можно сохранить текущий общий вес как полный.</div>
+            </div>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Полный вес корзины с товаром, г</label>
-            <input id="fullWeight" type="number" class="form-control" value="0">
+          <div>
+            <label for="calibrationReferenceWeight">Опорный вес калибровки, г</label>
+            <input id="calibrationReferenceWeight" type="number" value="500">
           </div>
-          <div class="mb-3">
-            <label class="form-label">Опорный вес калибровки, г</label>
-            <input id="calibrationReferenceWeight" type="number" class="form-control" value="500">
+          <div class="button-row">
+            <button class="btn-secondary" onclick="captureUnitWeight()">Снять вес 1 штуки</button>
+            <button class="btn-secondary" onclick="captureFullWeight()">Снять полный вес</button>
+            <button class="btn-primary" onclick="saveProfile()">Сохранить параметры товара</button>
           </div>
-          <button class="btn btn-sb text-white" onclick="saveProfile()">Сохранить параметры товара</button>
         </div>
-      </div>
+      </article>
 
-      <div class="col-12 col-lg-6">
-        <div class="panel">
-          <h2 class="h5 mb-3">Подключение и отправка</h2>
-          <div class="mb-3"><label class="form-label">Wi-Fi SSID</label><input id="wifiSsid" class="form-control"></div>
-          <div class="mb-3"><label class="form-label">Пароль Wi-Fi</label><input id="wifiPassword" type="password" class="form-control"></div>
-          <div class="mb-3"><label class="form-label">MQTT host</label><input id="mqttHost" class="form-control"></div>
-          <div class="mb-3"><label class="form-label">MQTT port</label><input id="mqttPort" type="number" class="form-control" value="1883"></div>
-          <div class="mb-3"><label class="form-label">HTTP endpoint</label><input id="httpEndpoint" class="form-control" placeholder="http://server/api/baskets/ingest"></div>
-          <div class="form-check form-switch mb-3">
-            <input id="sendOnChangeOnly" class="form-check-input" type="checkbox" checked>
-            <label class="form-check-label" for="sendOnChangeOnly">Отправлять только при изменении</label>
+      <article class="panel">
+        <h2>Подключение и отправка</h2>
+        <div class="form-grid">
+          <div class="grid-2">
+            <div>
+              <label for="wifiSsid">Wi-Fi SSID</label>
+              <input id="wifiSsid">
+            </div>
+            <div>
+              <label for="wifiPassword">Пароль Wi-Fi</label>
+              <input id="wifiPassword" type="password">
+            </div>
           </div>
-          <div class="mb-3"><label class="form-label">Порог изменения, г</label><input id="changeThreshold" type="number" class="form-control" value="5"></div>
+          <div class="grid-2">
+            <div>
+              <label for="mqttHost">MQTT host</label>
+              <input id="mqttHost">
+            </div>
+            <div>
+              <label for="mqttPort">MQTT port</label>
+              <input id="mqttPort" type="number" value="1883">
+            </div>
+          </div>
+          <div>
+            <label for="httpEndpoint">HTTP endpoint</label>
+            <input id="httpEndpoint" placeholder="http://server/api/baskets/ingest">
+          </div>
+          <div class="switch-row">
+            <span>Отправлять только при изменении</span>
+            <label class="switch">
+              <input id="sendOnChangeOnly" type="checkbox" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div>
+            <label for="changeThreshold">Порог изменения, г</label>
+            <input id="changeThreshold" type="number" value="5">
+          </div>
         </div>
-      </div>
+      </article>
 
-      <div class="col-12">
-        <div class="panel">
-          <h2 class="h5 mb-3">Калибровка и сервис</h2>
-          <div class="row g-2 mb-3">
-            <div class="col-6 col-md-3"><input id="cal0" type="number" class="form-control" value="1"></div>
-            <div class="col-6 col-md-3"><input id="cal1" type="number" class="form-control" value="1"></div>
-            <div class="col-6 col-md-3"><input id="cal2" type="number" class="form-control" value="1"></div>
-            <div class="col-6 col-md-3"><input id="cal3" type="number" class="form-control" value="1"></div>
+      <article class="panel full">
+        <h2>Калибровка и сервис</h2>
+        <div class="form-grid">
+          <div class="grid-4">
+            <div><label for="cal0">Коэффициент 1</label><input id="cal0" type="number" value="1"></div>
+            <div><label for="cal1">Коэффициент 2</label><input id="cal1" type="number" value="1"></div>
+            <div><label for="cal2">Коэффициент 3</label><input id="cal2" type="number" value="1"></div>
+            <div><label for="cal3">Коэффициент 4</label><input id="cal3" type="number" value="1"></div>
           </div>
-          <div class="d-flex flex-wrap gap-2">
-            <button class="btn btn-sb text-white" onclick="saveCalibration()">Сохранить калибровку</button>
-            <button class="btn btn-outline-secondary rounded-pill" onclick="tare()">Тара</button>
+          <div class="button-row">
+            <button class="btn-primary" onclick="saveCalibration()">Сохранить калибровку</button>
+            <button class="btn-secondary" onclick="tare()">Тара</button>
           </div>
+          <div class="tiny">Весь CSS и JavaScript встроен в эту страницу и отдается с ESP32 через LittleFS.</div>
         </div>
-      </div>
-    </div>
+      </article>
+    </section>
   </div>
 
   <script>
-    let currentRetailer = null;
-    let currentStores = [];
+    let currentStore = null;
 
     function num(value, digits = 1) {
       const v = Number(value || 0);
-      return Number.isFinite(v) ? v.toFixed(digits) : '0';
+      return Number.isFinite(v) ? v.toFixed(digits) : "0";
     }
 
-    async function request(url, method = 'GET', body) {
+    async function request(url, method = "GET", body) {
       const options = { method, headers: {} };
       if (body) {
-        options.headers['Content-Type'] = 'application/json';
+        options.headers["Content-Type"] = "application/json";
         options.body = JSON.stringify(body);
       }
       const res = await fetch(url, options);
       if (!res.ok) throw new Error(await res.text());
-      return res.headers.get('content-type')?.includes('application/json') ? res.json() : res.text();
+      return res.headers.get("content-type")?.includes("application/json") ? res.json() : res.text();
     }
 
-    async function remoteRequest(path, method = 'GET', body) {
-      const base = document.getElementById('registrationServerUrl').value.replace(/\/$/, '');
-      if (!base) throw new Error('Укажите сервер регистрации');
-      const url = `${base}${path}`;
-      const options = { method, headers: {} };
-      if (body) {
-        options.headers['Content-Type'] = 'application/json';
-        options.body = JSON.stringify(body);
-      }
-      const res = await fetch(url, options);
+    async function remoteRequest(path, method = "GET", body) {
+      const base = document.getElementById("registrationServerUrl").value.replace(/\/$/, "");
+      if (!base) throw new Error("Укажите сервер регистрации");
+      const res = await fetch(`${base}${path}`, {
+        method,
+        headers: body ? { "Content-Type": "application/json" } : {},
+        body: body ? JSON.stringify(body) : undefined
+      });
       if (!res.ok) throw new Error(await res.text());
-      return res.headers.get('content-type')?.includes('application/json') ? res.json() : res.text();
+      return res.headers.get("content-type")?.includes("application/json") ? res.json() : res.text();
     }
 
     function setRegistrationStatus(text) {
-      document.getElementById('registrationStatus').textContent = text;
+      document.getElementById("registrationStatus").textContent = text;
     }
 
-    function renderStoreSelect() {
-      const select = document.getElementById('storeSelect');
-      if (!currentStores.length) {
-        select.innerHTML = '<option value="">Магазины не найдены</option>';
-        return;
-      }
-      select.innerHTML = currentStores.map(store =>
-        `<option value="${store.storeId}">${store.storeName}${store.location ? ' - ' + store.location : ''}</option>`
-      ).join('');
-    }
-
-    async function loadStoresByPin() {
+    async function loadStoreByPin() {
       try {
-        const pin = document.getElementById('retailerPin').value.trim();
-        const data = await remoteRequest(`/api/registration/retailer-by-pin?pin=${encodeURIComponent(pin)}`);
-        currentRetailer = data;
-        currentStores = data.stores || [];
-        renderStoreSelect();
-        setRegistrationStatus(`PIN принят. Ритейлор: ${data.retailerName}. Найдено магазинов: ${currentStores.length}.`);
+        const pin = document.getElementById("storePin").value.trim();
+        const data = await remoteRequest(`/api/registration/store-by-pin?pin=${encodeURIComponent(pin)}`);
+        currentStore = data;
+        document.getElementById("storeNamePreview").value = `${data.storeName} / ${data.retailerName}`;
+        setRegistrationStatus(`Найден магазин "${data.storeName}" ритейлора "${data.retailerName}".`);
       } catch (error) {
-        currentRetailer = null;
-        currentStores = [];
-        renderStoreSelect();
-        setRegistrationStatus(`Ошибка получения магазинов: ${error.message}`);
+        currentStore = null;
+        document.getElementById("storeNamePreview").value = "";
+        setRegistrationStatus(`Ошибка поиска магазина: ${error.message}`);
       }
     }
 
     async function registerBasket() {
       try {
-        const storeId = document.getElementById('storeSelect').value;
-        const payload = await remoteRequest('/api/registration/register-basket', 'POST', {
-          pinCode: document.getElementById('retailerPin').value.trim(),
-          storeId,
-          basketId: document.getElementById('basketId').value.trim(),
-          basketLocation: document.getElementById('basketLocation').value.trim(),
-          productName: document.getElementById('productName').value.trim(),
-          productCode: document.getElementById('productCode').value.trim()
+        if (!currentStore) {
+          throw new Error("Сначала найдите магазин по PIN");
+        }
+
+        const payload = await remoteRequest("/api/registration/register-basket", "POST", {
+          pinCode: document.getElementById("storePin").value.trim(),
+          storeId: currentStore.storeId,
+          basketId: document.getElementById("basketId").value.trim(),
+          basketLocation: document.getElementById("basketLocation").value.trim(),
+          productName: document.getElementById("productName").value.trim(),
+          productCode: document.getElementById("productCode").value.trim()
         });
 
-        await request('/api/settings', 'POST', {
+        await request("/api/settings", "POST", {
           basketId: payload.basketId,
           retailerId: payload.retailerId,
           retailerName: payload.retailerName,
-          retailerPin: document.getElementById('retailerPin').value.trim(),
+          retailerPin: currentStore.retailerPin || "",
+          storePin: document.getElementById("storePin").value.trim(),
           storeId: payload.storeId,
           storeName: payload.storeName,
           basketLocation: payload.basketLocation,
           productName: payload.productName,
           productCode: payload.productCode,
-          registrationServerUrl: document.getElementById('registrationServerUrl').value.trim()
+          registrationServerUrl: document.getElementById("registrationServerUrl").value.trim()
         });
 
-        document.getElementById('httpEndpoint').value =
-          `${document.getElementById('registrationServerUrl').value.replace(/\/$/, '')}/api/baskets/ingest`;
+        document.getElementById("httpEndpoint").value =
+          `${document.getElementById("registrationServerUrl").value.replace(/\/$/, "")}/api/baskets/ingest`;
 
-        setRegistrationStatus(`Корзина ${payload.basketId} зарегистрирована в магазине "${payload.storeName}" ритейлора "${payload.retailerName}".`);
+        setRegistrationStatus(`Корзина ${payload.basketId} зарегистрирована в магазине "${payload.storeName}".`);
         await saveSettings();
       } catch (error) {
         setRegistrationStatus(`Ошибка регистрации: ${error.message}`);
@@ -317,107 +479,139 @@
     }
 
     async function refreshStatus() {
-      const [status, settings] = await Promise.all([request('/api/status'), request('/api/settings')]);
-      document.getElementById('weight').textContent = `${num(status.totalWeight)} г`;
-      document.getElementById('quantity').textContent = `${status.quantity ?? 0}`;
-      document.getElementById('fullQuantity').textContent = `${status.fullQuantity ?? 0}`;
-      document.getElementById('removedQuantity').textContent = `${status.removedQuantity ?? 0}`;
-      document.getElementById('fillPercent').textContent = `${num(status.fillPercent, 0)} %`;
-      document.getElementById('temp').textContent = `${num(status.temperature)} C`;
-      document.getElementById('humidity').textContent = `${num(status.humidity, 0)} %`;
-      document.getElementById('basketMeta').textContent = settings.basketId || '-';
+      const [status, settings] = await Promise.all([request("/api/status"), request("/api/settings")]);
+      document.getElementById("weight").textContent = `${num(status.totalWeight)} г`;
+      document.getElementById("quantity").textContent = `${status.quantity ?? 0}`;
+      document.getElementById("fullQuantity").textContent = `${status.fullQuantity ?? 0}`;
+      document.getElementById("removedQuantity").textContent = `${status.removedQuantity ?? 0}`;
+      document.getElementById("fillPercent").textContent = `${num(status.fillPercent, 0)} %`;
+      document.getElementById("temp").textContent = `${num(status.temperature)} C`;
+      document.getElementById("humidity").textContent = `${num(status.humidity, 0)} %`;
+      document.getElementById("basketMeta").textContent = settings.basketId || "-";
     }
 
     async function loadSettings() {
-      const settings = await request('/api/settings');
-      currentRetailer = settings.retailerId ? {
-        retailerId: settings.retailerId,
-        retailerName: settings.retailerName || '',
-        retailerPin: settings.retailerPin || ''
-      } : null;
-      currentStores = settings.storeId ? [{
-        storeId: settings.storeId,
-        storeName: settings.storeName || 'Текущий магазин',
-        location: settings.basketLocation || ''
-      }] : [];
-      document.getElementById('basketId').value = settings.basketId || '';
-      document.getElementById('basketLocation').value = settings.basketLocation || '';
-      document.getElementById('productName').value = settings.productName || '';
-      document.getElementById('productCode').value = settings.productCode || '';
-      document.getElementById('registrationServerUrl').value = settings.registrationServerUrl || '';
-      document.getElementById('retailerPin').value = settings.retailerPin || '';
-      renderStoreSelect();
-      if (settings.storeId) {
-        document.getElementById('storeSelect').value = settings.storeId;
-      }
-      document.getElementById('wifiSsid').value = settings.wifiSsid || '';
-      document.getElementById('mqttHost').value = settings.mqttHost || '';
-      document.getElementById('mqttPort').value = settings.mqttPort ?? 1883;
-      document.getElementById('httpEndpoint').value = settings.httpEndpoint || '';
-      document.getElementById('sendOnChangeOnly').checked = !!settings.sendOnChangeOnly;
-      document.getElementById('changeThreshold').value = settings.changeThreshold ?? 5;
-      document.getElementById('unitWeight').value = settings.unitWeight ?? 100;
-      document.getElementById('fullWeight').value = settings.fullWeight ?? 0;
-      document.getElementById('calibrationReferenceWeight').value = settings.calibrationReferenceWeight ?? 500;
-      document.getElementById('mode').value = settings.mode || 'mass';
-      ['cal0', 'cal1', 'cal2', 'cal3'].forEach((id, index) => {
+      const settings = await request("/api/settings");
+      document.getElementById("basketId").value = settings.basketId || "";
+      document.getElementById("basketLocation").value = settings.basketLocation || "";
+      document.getElementById("productName").value = settings.productName || "";
+      document.getElementById("productCode").value = settings.productCode || "";
+      document.getElementById("registrationServerUrl").value = settings.registrationServerUrl || "";
+      document.getElementById("storePin").value = settings.storePin || "";
+      document.getElementById("storeNamePreview").value = settings.storeName ? `${settings.storeName} / ${settings.retailerName || ""}` : "";
+      document.getElementById("wifiSsid").value = settings.wifiSsid || "";
+      document.getElementById("wifiPassword").value = settings.wifiPassword || "";
+      document.getElementById("mqttHost").value = settings.mqttHost || "";
+      document.getElementById("mqttPort").value = settings.mqttPort ?? 1883;
+      document.getElementById("httpEndpoint").value = settings.httpEndpoint || "";
+      document.getElementById("sendOnChangeOnly").checked = !!settings.sendOnChangeOnly;
+      document.getElementById("changeThreshold").value = settings.changeThreshold ?? 5;
+      document.getElementById("unitWeight").value = settings.unitWeight ?? 100;
+      document.getElementById("fullWeight").value = settings.fullWeight ?? 0;
+      document.getElementById("calibrationReferenceWeight").value = settings.calibrationReferenceWeight ?? 500;
+      document.getElementById("mode").value = settings.mode || "mass";
+
+      ["cal0", "cal1", "cal2", "cal3"].forEach((id, index) => {
         document.getElementById(id).value = settings.calibration?.[index] ?? 1;
       });
-      if (settings.storeName) {
-        setRegistrationStatus(`Локально сохранено: ${settings.retailerName || 'ритейлор'} / ${settings.storeName}.`);
+
+      if (settings.storeId) {
+        currentStore = {
+          storeId: settings.storeId,
+          storeName: settings.storeName || "",
+          storePin: settings.storePin || "",
+          retailerId: settings.retailerId || "",
+          retailerName: settings.retailerName || "",
+          retailerPin: settings.retailerPin || ""
+        };
       }
     }
 
     async function saveSettings() {
-      await request('/api/settings', 'POST', {
-        basketId: document.getElementById('basketId').value,
-        retailerId: currentRetailer?.retailerId || '',
-        retailerName: currentRetailer?.retailerName || '',
-        retailerPin: document.getElementById('retailerPin').value,
-        storeId: document.getElementById('storeSelect').value,
-        storeName: (currentStores.find(store => store.storeId === document.getElementById('storeSelect').value) || {}).storeName || '',
-        basketLocation: document.getElementById('basketLocation').value,
-        productName: document.getElementById('productName').value,
-        productCode: document.getElementById('productCode').value,
-        registrationServerUrl: document.getElementById('registrationServerUrl').value,
-        wifiSsid: document.getElementById('wifiSsid').value,
-        wifiPassword: document.getElementById('wifiPassword').value,
-        mqttHost: document.getElementById('mqttHost').value,
-        mqttPort: Number(document.getElementById('mqttPort').value),
-        httpEndpoint: document.getElementById('httpEndpoint').value,
-        sendOnChangeOnly: document.getElementById('sendOnChangeOnly').checked,
-        changeThreshold: Number(document.getElementById('changeThreshold').value),
-        mode: document.getElementById('mode').value
+      await request("/api/settings", "POST", {
+        basketId: document.getElementById("basketId").value,
+        retailerId: currentStore?.retailerId || "",
+        retailerName: currentStore?.retailerName || "",
+        retailerPin: currentStore?.retailerPin || "",
+        storePin: document.getElementById("storePin").value,
+        storeId: currentStore?.storeId || "",
+        storeName: currentStore?.storeName || "",
+        basketLocation: document.getElementById("basketLocation").value,
+        productName: document.getElementById("productName").value,
+        productCode: document.getElementById("productCode").value,
+        registrationServerUrl: document.getElementById("registrationServerUrl").value,
+        wifiSsid: document.getElementById("wifiSsid").value,
+        wifiPassword: document.getElementById("wifiPassword").value,
+        mqttHost: document.getElementById("mqttHost").value,
+        mqttPort: Number(document.getElementById("mqttPort").value),
+        httpEndpoint: document.getElementById("httpEndpoint").value,
+        sendOnChangeOnly: document.getElementById("sendOnChangeOnly").checked,
+        changeThreshold: Number(document.getElementById("changeThreshold").value),
+        mode: document.getElementById("mode").value
       });
-      setRegistrationStatus('Локальные настройки корзины сохранены.');
+      setRegistrationStatus("Локальные настройки корзины сохранены.");
       await refreshStatus();
     }
 
     async function saveProfile() {
-      await request('/api/profile', 'POST', {
-        mode: document.getElementById('mode').value,
-        productName: document.getElementById('productName').value,
-        productCode: document.getElementById('productCode').value,
-        unitWeight: Number(document.getElementById('unitWeight').value),
-        fullWeight: Number(document.getElementById('fullWeight').value),
-        calibrationReferenceWeight: Number(document.getElementById('calibrationReferenceWeight').value)
+      const result = await request("/api/profile", "POST", {
+        mode: document.getElementById("mode").value,
+        productName: document.getElementById("productName").value,
+        productCode: document.getElementById("productCode").value,
+        unitWeight: Number(document.getElementById("unitWeight").value),
+        fullWeight: Number(document.getElementById("fullWeight").value),
+        calibrationReferenceWeight: Number(document.getElementById("calibrationReferenceWeight").value)
       });
+      document.getElementById("unitWeight").value = result.unitWeight ?? document.getElementById("unitWeight").value;
+      document.getElementById("fullWeight").value = result.fullWeight ?? document.getElementById("fullWeight").value;
+      setRegistrationStatus("Параметры товара сохранены.");
+      await refreshStatus();
+    }
+
+    async function captureUnitWeight() {
+      const result = await request("/api/profile", "POST", {
+        mode: document.getElementById("mode").value,
+        productName: document.getElementById("productName").value,
+        productCode: document.getElementById("productCode").value,
+        fullWeight: Number(document.getElementById("fullWeight").value),
+        calibrationReferenceWeight: Number(document.getElementById("calibrationReferenceWeight").value),
+        captureUnitWeight: true
+      });
+      document.getElementById("unitWeight").value = result.unitWeight ?? document.getElementById("unitWeight").value;
+      setRegistrationStatus(`Вес одной штуки снят с датчиков: ${num(result.unitWeight)} г.`);
+      await refreshStatus();
+    }
+
+    async function captureFullWeight() {
+      const result = await request("/api/profile", "POST", {
+        mode: document.getElementById("mode").value,
+        productName: document.getElementById("productName").value,
+        productCode: document.getElementById("productCode").value,
+        unitWeight: Number(document.getElementById("unitWeight").value),
+        calibrationReferenceWeight: Number(document.getElementById("calibrationReferenceWeight").value),
+        captureFullWeight: true
+      });
+      document.getElementById("fullWeight").value = result.fullWeight ?? document.getElementById("fullWeight").value;
+      setRegistrationStatus(`Полный вес корзины снят с датчиков: ${num(result.fullWeight)} г.`);
       await refreshStatus();
     }
 
     async function saveCalibration() {
-      await request('/api/calibration', 'POST', {
-        calibration: ['cal0', 'cal1', 'cal2', 'cal3'].map(id => Number(document.getElementById(id).value))
+      await request("/api/calibration", "POST", {
+        calibration: ["cal0", "cal1", "cal2", "cal3"].map((id) => Number(document.getElementById(id).value))
       });
+      setRegistrationStatus("Калибровка сохранена.");
     }
 
     async function tare() {
-      await request('/api/tare', 'POST');
+      await request("/api/tare", "POST");
+      setRegistrationStatus("Тара выполнена.");
       await refreshStatus();
     }
 
     async function sendNow() {
-      await request('/api/send', 'POST');
+      await request("/api/send", "POST");
+      setRegistrationStatus("Данные отправлены на сервер.");
     }
 
     loadSettings().then(refreshStatus);

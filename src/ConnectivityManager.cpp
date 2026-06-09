@@ -4,7 +4,6 @@
 #include <LittleFS.h>
 
 #include "Config.h"
-#include "WebUi.h"
 
 namespace {
 ConnectivityManager* g_instance = nullptr;
@@ -31,7 +30,7 @@ void ConnectivityManager::begin(AppSettings& settings, StatusCallback statusCall
   beginStation(settings);
 
   if (!LittleFS.begin(true)) {
-    Serial.println("LittleFS mount failed, using fallback UI");
+    Serial.println("LittleFS mount failed");
   }
 
   configureRoutes(settings);
@@ -61,6 +60,7 @@ void ConnectivityManager::publishState(const SensorReadings& readings, const App
   doc["retailerId"] = settings.retailerId;
   doc["retailerName"] = settings.retailerName;
   doc["retailerPin"] = settings.retailerPin;
+  doc["storePin"] = settings.storePin;
   doc["storeId"] = settings.storeId;
   doc["storeName"] = settings.storeName;
   doc["basketLocation"] = settings.basketLocation;
@@ -141,14 +141,14 @@ void ConnectivityManager::configureRoutes(AppSettings& settings) {
 }
 
 void ConnectivityManager::handleRoot() {
-  if (LittleFS.exists("/index.html")) {
-    File file = LittleFS.open("/index.html", "r");
-    server_.streamFile(file, "text/html; charset=utf-8");
-    file.close();
+  if (!LittleFS.exists("/index.html")) {
+    server_.send(500, "text/plain; charset=utf-8", "index.html not found in LittleFS");
     return;
   }
 
-  server_.send_P(200, "text/html; charset=utf-8", kFallbackIndexHtml);
+  File file = LittleFS.open("/index.html", "r");
+  server_.streamFile(file, "text/html; charset=utf-8");
+  file.close();
 }
 
 void ConnectivityManager::handleStatus() {
@@ -182,6 +182,7 @@ void ConnectivityManager::handleSettingsGet(const AppSettings& settings) {
   doc["retailerId"] = settings.retailerId;
   doc["retailerName"] = settings.retailerName;
   doc["retailerPin"] = settings.retailerPin;
+  doc["storePin"] = settings.storePin;
   doc["storeId"] = settings.storeId;
   doc["storeName"] = settings.storeName;
   doc["basketLocation"] = settings.basketLocation;
@@ -220,6 +221,7 @@ void ConnectivityManager::handleSettingsUpdate(AppSettings& settings) {
   strlcpy(settings.retailerId, doc["retailerId"] | settings.retailerId, sizeof(settings.retailerId));
   strlcpy(settings.retailerName, doc["retailerName"] | settings.retailerName, sizeof(settings.retailerName));
   strlcpy(settings.retailerPin, doc["retailerPin"] | settings.retailerPin, sizeof(settings.retailerPin));
+  strlcpy(settings.storePin, doc["storePin"] | settings.storePin, sizeof(settings.storePin));
   strlcpy(settings.storeId, doc["storeId"] | settings.storeId, sizeof(settings.storeId));
   strlcpy(settings.storeName, doc["storeName"] | settings.storeName, sizeof(settings.storeName));
   strlcpy(settings.basketLocation, doc["basketLocation"] | settings.basketLocation, sizeof(settings.basketLocation));
@@ -255,8 +257,28 @@ void ConnectivityManager::handleWeightProfile(AppSettings& settings) {
     return;
   }
 
-  settings.unitWeight = doc["unitWeight"] | settings.unitWeight;
-  settings.fullWeight = doc["fullWeight"] | settings.fullWeight;
+  const SensorReadings readings = statusCallback_ ? statusCallback_() : SensorReadings{};
+
+  if ((doc["captureUnitWeight"] | false)) {
+    if (!isfinite(readings.totalWeight) || readings.totalWeight <= 1.0F) {
+      server_.send(400, "application/json", "{\"error\":\"current weight is too low for unit capture\"}");
+      return;
+    }
+    settings.unitWeight = readings.totalWeight;
+  } else {
+    settings.unitWeight = doc["unitWeight"] | settings.unitWeight;
+  }
+
+  if ((doc["captureFullWeight"] | false)) {
+    if (!isfinite(readings.totalWeight) || readings.totalWeight <= 1.0F) {
+      server_.send(400, "application/json", "{\"error\":\"current weight is too low for full capture\"}");
+      return;
+    }
+    settings.fullWeight = readings.totalWeight;
+  } else {
+    settings.fullWeight = doc["fullWeight"] | settings.fullWeight;
+  }
+
   settings.calibrationReferenceWeight = doc["calibrationReferenceWeight"] | settings.calibrationReferenceWeight;
   strlcpy(settings.productName, doc["productName"] | settings.productName, sizeof(settings.productName));
   strlcpy(settings.productCode, doc["productCode"] | settings.productCode, sizeof(settings.productCode));
@@ -264,7 +286,14 @@ void ConnectivityManager::handleWeightProfile(AppSettings& settings) {
   settings.productMode = mode == "pieces" ? ProductMode::Pieces : ProductMode::Mass;
 
   settingsCallback_(settings);
-  server_.send(200, "application/json", "{\"ok\":true}");
+
+  JsonDocument response;
+  response["ok"] = true;
+  response["unitWeight"] = settings.unitWeight;
+  response["fullWeight"] = settings.fullWeight;
+  String body;
+  serializeJson(response, body);
+  server_.send(200, "application/json", body);
 }
 
 void ConnectivityManager::handleCalibration(AppSettings& settings) {
@@ -326,6 +355,7 @@ void ConnectivityManager::sendHttpState(const SensorReadings& readings, const Ap
   doc["retailerId"] = settings.retailerId;
   doc["retailerName"] = settings.retailerName;
   doc["retailerPin"] = settings.retailerPin;
+  doc["storePin"] = settings.storePin;
   doc["storeId"] = settings.storeId;
   doc["storeName"] = settings.storeName;
   doc["basketLocation"] = settings.basketLocation;

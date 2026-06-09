@@ -47,8 +47,7 @@ SmartBasket — это интеллектуальная корзина на ба
 ### Сервер
 
 - `Python`
-- `FastAPI`
-- `Uvicorn`
+- `Flask`
 - `SQLite`
 - HTML-страницы для мониторинга и администрирования
 
@@ -235,7 +234,7 @@ pip install -r requirements.txt
 Запуск:
 
 ```bash
-uvicorn app:app --host 0.0.0.0 --port 8000
+python app.py
 ```
 
 ## Страницы сервера

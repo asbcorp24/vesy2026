@@ -28,6 +28,7 @@ struct AppSettings {
   char retailerId[24] = "";
   char retailerName[48] = "";
   char retailerPin[16] = "";
+  char storePin[16] = "";
   char storeId[24] = "";
   char storeName[48] = "";
   char basketLocation[48] = "";
