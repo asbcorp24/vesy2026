@@ -7,6 +7,7 @@
 #include "DisplayManager.h"
 #include "ScaleManager.h"
 #include "StorageManager.h"
+#include "TiltManager.h"
 #include "Types.h"
 
 class App {
@@ -20,6 +21,7 @@ class App {
     RefWeightDown,
     CalibrateCorner,
     SaveCalibration,
+    ZeroTilt,
     ToggleMode,
     Exit,
     Count
@@ -35,9 +37,11 @@ class App {
   void renderMenu();
   void setStatusMessage(const char* message);
   bool shouldPublish() const;
+  void zeroTilt();
 
   StorageManager storage_;
   ScaleManager scales_;
+  TiltManager tilt_;
   ClimateManager climate_;
   DisplayManager display_;
   ConnectivityManager connectivity_;
@@ -48,9 +52,12 @@ class App {
   unsigned long lastDisplayMs_ = 0;
   unsigned long lastMenuActionMs_ = 0;
   unsigned long statusMessageUntilMs_ = 0;
+  float lastRawTiltX_ = 0.0F;
+  float lastRawTiltY_ = 0.0F;
   bool sensorUpdated_ = false;
   bool calibrationDirty_ = false;
   bool menuActive_ = false;
+  bool imuSampleReady_ = false;
   uint8_t menuIndex_ = 0;
   uint8_t calibrationCorner_ = 0;
   char statusMessage_[32] = "";

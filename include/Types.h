@@ -9,11 +9,14 @@ enum class ProductMode : uint8_t {
 
 struct SensorReadings {
   float cornerWeights[4] = {0, 0, 0, 0};
+  float rawWeight = 0.0F;
   float totalWeight = 0.0F;
+  float compensationFactor = 1.0F;
   float centerX = 0.0F;
   float centerY = 0.0F;
   float tiltX = 0.0F;
   float tiltY = 0.0F;
+  bool imuReady = false;
   float temperature = NAN;
   float humidity = NAN;
   uint32_t quantity = 0;
@@ -45,6 +48,8 @@ struct AppSettings {
   float fullWeight = 0.0F;
   float calibrationReferenceWeight = 500.0F;
   float calibration[4] = {1.0F, 1.0F, 1.0F, 1.0F};
+  float tiltZeroX = 0.0F;
+  float tiltZeroY = 0.0F;
   bool sendOnChangeOnly = true;
   float changeThreshold = 5.0F;
   uint8_t serverMac[6] = {0, 0, 0, 0, 0, 0};

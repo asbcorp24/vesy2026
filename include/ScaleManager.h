@@ -9,6 +9,7 @@ class ScaleManager {
   void begin(const AppSettings& settings);
   void updateSettings(const AppSettings& settings);
   SensorReadings read(const AppSettings& settings);
+  void finalizeReadings(SensorReadings& readings, const AppSettings& settings);
   void tare();
   void tare(uint8_t index);
   bool calibrate(uint8_t index, float referenceWeight, float& calibrationFactor);

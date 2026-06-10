@@ -38,6 +38,8 @@ void DisplayManager::render(const SensorReadings& readings, const AppSettings& s
   display_.print(wifiConnected ? "WiFi" : "AP");
   display_.print(" ");
   display_.print(mqttConnected ? "MQTT" : "--");
+  display_.print(" ");
+  display_.print(readings.imuReady ? "IMU" : "NOIMU");
 
   display_.sendBuffer();
 }

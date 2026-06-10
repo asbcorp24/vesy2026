@@ -20,10 +20,16 @@ String makeStateTopic(const AppSettings& settings) {
 
 ConnectivityManager::ConnectivityManager() : mqttClient_(wifiClient_), server_(80) {}
 
-void ConnectivityManager::begin(AppSettings& settings, StatusCallback statusCallback, SettingsCallback settingsCallback, ActionCallback tareCallback) {
+void ConnectivityManager::begin(
+    AppSettings& settings,
+    StatusCallback statusCallback,
+    SettingsCallback settingsCallback,
+    ActionCallback tareCallback,
+    ActionCallback tiltZeroCallback) {
   statusCallback_ = statusCallback;
   settingsCallback_ = settingsCallback;
   tareCallback_ = tareCallback;
+  tiltZeroCallback_ = tiltZeroCallback;
 
   WiFi.mode(WIFI_AP_STA);
   beginAccessPoint();
@@ -66,7 +72,9 @@ void ConnectivityManager::publishState(const SensorReadings& readings, const App
   doc["basketLocation"] = settings.basketLocation;
   doc["productName"] = settings.productName;
   doc["productCode"] = settings.productCode;
+  doc["rawWeight"] = readings.rawWeight;
   doc["totalWeight"] = readings.totalWeight;
+  doc["compensationFactor"] = readings.compensationFactor;
   doc["unitWeight"] = settings.unitWeight;
   doc["fullWeight"] = settings.fullWeight;
   doc["quantity"] = readings.quantity;
@@ -79,6 +87,7 @@ void ConnectivityManager::publishState(const SensorReadings& readings, const App
   doc["centerY"] = readings.centerY;
   doc["tiltX"] = readings.tiltX;
   doc["tiltY"] = readings.tiltY;
+  doc["imuReady"] = readings.imuReady;
   doc["mode"] = settings.productMode == ProductMode::Mass ? "mass" : "pieces";
 
   char payload[768];
@@ -138,6 +147,7 @@ void ConnectivityManager::configureRoutes(AppSettings& settings) {
   server_.on("/api/calibration", HTTP_POST, [this, &settings]() { handleCalibration(settings); });
   server_.on("/api/send", HTTP_POST, [this, &settings]() { handleSendNow(settings); });
   server_.on("/api/tare", HTTP_POST, [this]() { handleTare(); });
+  server_.on("/api/tilt-zero", HTTP_POST, [this]() { handleTiltZero(); });
 }
 
 void ConnectivityManager::handleRoot() {
@@ -155,7 +165,9 @@ void ConnectivityManager::handleStatus() {
   const SensorReadings readings = statusCallback_ ? statusCallback_() : SensorReadings{};
 
   JsonDocument doc;
+  doc["rawWeight"] = readings.rawWeight;
   doc["totalWeight"] = readings.totalWeight;
+  doc["compensationFactor"] = readings.compensationFactor;
   doc["quantity"] = readings.quantity;
   doc["fullQuantity"] = readings.fullQuantity;
   doc["removedQuantity"] = readings.removedQuantity;
@@ -166,6 +178,7 @@ void ConnectivityManager::handleStatus() {
   doc["centerY"] = readings.centerY;
   doc["tiltX"] = readings.tiltX;
   doc["tiltY"] = readings.tiltY;
+  doc["imuReady"] = readings.imuReady;
   JsonArray corners = doc["corners"].to<JsonArray>();
   for (float weight : readings.cornerWeights) {
     corners.add(weight);
@@ -199,6 +212,8 @@ void ConnectivityManager::handleSettingsGet(const AppSettings& settings) {
   doc["fullWeight"] = settings.fullWeight;
   doc["mode"] = settings.productMode == ProductMode::Mass ? "mass" : "pieces";
   doc["calibrationReferenceWeight"] = settings.calibrationReferenceWeight;
+  doc["tiltZeroX"] = settings.tiltZeroX;
+  doc["tiltZeroY"] = settings.tiltZeroY;
   JsonArray calibration = doc["calibration"].to<JsonArray>();
   for (float value : settings.calibration) {
     calibration.add(value);
@@ -329,6 +344,13 @@ void ConnectivityManager::handleTare() {
   server_.send(200, "application/json", "{\"ok\":true}");
 }
 
+void ConnectivityManager::handleTiltZero() {
+  if (tiltZeroCallback_) {
+    tiltZeroCallback_();
+  }
+  server_.send(200, "application/json", "{\"ok\":true}");
+}
+
 void ConnectivityManager::ensureMqtt(const AppSettings& settings) {
   if (mqttClient_.connected() || strlen(settings.mqttHost) == 0) {
     return;
@@ -361,7 +383,9 @@ void ConnectivityManager::sendHttpState(const SensorReadings& readings, const Ap
   doc["basketLocation"] = settings.basketLocation;
   doc["productName"] = settings.productName;
   doc["productCode"] = settings.productCode;
+  doc["rawWeight"] = readings.rawWeight;
   doc["totalWeight"] = readings.totalWeight;
+  doc["compensationFactor"] = readings.compensationFactor;
   doc["unitWeight"] = settings.unitWeight;
   doc["fullWeight"] = settings.fullWeight;
   doc["quantity"] = readings.quantity;
@@ -374,6 +398,7 @@ void ConnectivityManager::sendHttpState(const SensorReadings& readings, const Ap
   doc["centerY"] = readings.centerY;
   doc["tiltX"] = readings.tiltX;
   doc["tiltY"] = readings.tiltY;
+  doc["imuReady"] = readings.imuReady;
 
   String body;
   serializeJson(doc, body);

@@ -30,8 +30,13 @@ SensorReadings ScaleManager::read(const AppSettings& settings) {
     }
   }
 
+  readings.rawWeight = readings.totalWeight;
   updateDerivedValues(readings, settings);
   return readings;
+}
+
+void ScaleManager::finalizeReadings(SensorReadings& readings, const AppSettings& settings) {
+  updateDerivedValues(readings, settings);
 }
 
 void ScaleManager::tare() {
@@ -67,7 +72,8 @@ bool ScaleManager::isReady(uint8_t index) const {
 }
 
 void ScaleManager::updateDerivedValues(SensorReadings& readings, const AppSettings& settings) {
-  const float safeWeight = fabs(readings.totalWeight) < 0.001F ? 1.0F : readings.totalWeight;
+  const float balanceWeight = fabs(readings.rawWeight) >= 0.001F ? readings.rawWeight : readings.totalWeight;
+  const float safeWeight = fabs(balanceWeight) < 0.001F ? 1.0F : balanceWeight;
   const float left = readings.cornerWeights[0] + readings.cornerWeights[2];
   const float right = readings.cornerWeights[1] + readings.cornerWeights[3];
   const float top = readings.cornerWeights[0] + readings.cornerWeights[1];
@@ -75,8 +81,10 @@ void ScaleManager::updateDerivedValues(SensorReadings& readings, const AppSettin
 
   readings.centerX = (right - left) / safeWeight;
   readings.centerY = (top - bottom) / safeWeight;
-  readings.tiltX = readings.centerX * 10.0F;
-  readings.tiltY = readings.centerY * 10.0F;
+  if (!readings.imuReady) {
+    readings.tiltX = readings.centerX * 10.0F;
+    readings.tiltY = readings.centerY * 10.0F;
+  }
 
   if (settings.productMode == ProductMode::Pieces && settings.unitWeight > 0.01F) {
     readings.quantity = static_cast<uint32_t>(roundf(max(0.0F, readings.totalWeight) / settings.unitWeight));

@@ -18,7 +18,12 @@ class ConnectivityManager {
 
   ConnectivityManager();
 
-  void begin(AppSettings& settings, StatusCallback statusCallback, SettingsCallback settingsCallback, ActionCallback tareCallback);
+  void begin(
+      AppSettings& settings,
+      StatusCallback statusCallback,
+      SettingsCallback settingsCallback,
+      ActionCallback tareCallback,
+      ActionCallback tiltZeroCallback);
   void loop(AppSettings& settings);
   void publishState(const SensorReadings& readings, const AppSettings& settings, bool forceSend);
   bool isWifiConnected() const;
@@ -37,6 +42,7 @@ class ConnectivityManager {
   void handleCalibration(AppSettings& settings);
   void handleSendNow(AppSettings& settings);
   void handleTare();
+  void handleTiltZero();
   void ensureMqtt(const AppSettings& settings);
   void sendHttpState(const SensorReadings& readings, const AppSettings& settings);
   bool parseMacString(const String& value, uint8_t* output);
@@ -47,6 +53,7 @@ class ConnectivityManager {
   StatusCallback statusCallback_;
   SettingsCallback settingsCallback_;
   ActionCallback tareCallback_;
+  ActionCallback tiltZeroCallback_;
   SensorReadings lastPublished_;
   unsigned long lastMqttAttemptMs_ = 0;
 };
